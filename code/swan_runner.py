@@ -113,8 +113,18 @@ def read_table(filepath):
             elif s:
                 data_lines.append(s)
 
-    # Variable names are in the 2nd-to-last header line
-    var_names = headers[-2].lstrip('%').split()
+    # Variable names are in the header line that does NOT contain '[' (units)
+    # and is not blank. Search backwards from the end.
+    var_names = None
+    skip_prefixes = ('Run:', 'Table:', 'SWAN')
+    for h in reversed(headers):
+        tokens = h.lstrip('%').split()
+        if tokens and '[' not in h:
+            if not all(t.startswith(skip_prefixes) for t in tokens):
+                var_names = tokens
+                break
+    if var_names is None:
+        raise ValueError("Could not find variable names in SWAN TABLE header")
     data = np.loadtxt(data_lines)
     if data.ndim == 1:
         data = data.reshape(1, -1)

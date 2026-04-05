@@ -62,6 +62,10 @@ DIFFRACtion 1 0. 0. 1
 !
 !***********************************COMPUTE**************************************
 !
+!
+!--- output added by swan_runner.py ---
+BLOCK 'COMPGRID' NOHEAD 'ga_block.mat' LAY-OUT 3 XP YP HSIGN RTP DIR DEPTH OUTPUT 20240101.030000 6 HR
+!
 COMPute NONSTATionary 20240101.000000 1 HR 20240229.230000
 !
 STOP
