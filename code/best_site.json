@@ -1,0 +1,12 @@
+{
+  "lat": 42.0,
+  "lon": -125.0,
+  "mean_power": 65.27,
+  "consistency": 100.0,
+  "depth": 1093.0,
+  "dist_shore": 65.59,
+  "dir_variability": 39.03,
+  "mean_hs": 3.169,
+  "mean_tp": 12.243,
+  "c_star": 0.913
+}

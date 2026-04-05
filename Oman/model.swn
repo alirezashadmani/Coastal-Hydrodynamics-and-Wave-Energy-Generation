@@ -1,0 +1,128 @@
+!********************************STAR-UP***************************************
+!
+PROJECT  'Oman'  '1'
+!
+SET NAUTical
+!        
+MODE DYNAMIC TWODimensional
+!  
+COORDinates SPHErical CCM
+!
+!******************************MODEL DISCRIPTION*********************************
+!
+CGRID REG 52.2312 16.4077 0. 9.36 11.36 468 568 CIR 24 0.0521 0.5 25
+!
+!*****************************INPUT GRIDS & DATA*********************************
+!
+INP BOT REG 52.22916 16.40833 0. 2246 2725 0.00416 0.00416 EXC -999.
+READ BOT -1 'gebco.asc' 1 6 FREE
+!
+INPgrid WInd REG 52. 16. 0. 40 48 0.25 0.25 NONSTATionary 20210401.000000 1 HR 20210531.230000
+READinp WInd 1 'wind.inp' 1 FREE
+!
+!**************************BOUNDRY & INITIAL CONDITION***************************
+!
+BOUnd SHAPespec JONswap 3.3 PEAK DSPR DEGRees
+!
+BOUndspec W VARiable FILE 1.0 'BW2.TPAR'
+BOUndspec W VARiable FILE 1.5 'BW3.TPAR'
+BOUndspec W VARiable FILE 2.0 'BW4.TPAR'
+BOUndspec W VARiable FILE 2.5 'BW5.TPAR'
+BOUndspec W VARiable FILE 3.0 'BW6.TPAR'
+BOUndspec W VARiable FILE 3.5 'BW7.TPAR'
+!
+BOUndspec S VARiable FILE 1.0 'BS3.TPAR'
+BOUndspec S VARiable FILE 1.5 'BS4.TPAR'
+BOUndspec S VARiable FILE 2.0 'BS5.TPAR'
+BOUndspec S VARiable FILE 2.5 'BS6.TPAR'
+BOUndspec S VARiable FILE 3.0 'BS7.TPAR'
+BOUndspec S VARiable FILE 3.5 'BS8.TPAR'
+BOUndspec S VARiable FILE 4.0 'BS9.TPAR'
+BOUndspec S VARiable FILE 4.5 'BS10.TPAR'
+BOUndspec S VARiable FILE 5.0 'BS11.TPAR'
+BOUndspec S VARiable FILE 5.5 'BS12.TPAR'
+BOUndspec S VARiable FILE 6.0 'BS13.TPAR'
+BOUndspec S VARiable FILE 6.5 'BS14.TPAR'
+BOUndspec S VARiable FILE 7.0 'BS15.TPAR'
+BOUndspec S VARiable FILE 7.5 'BS16.TPAR'
+BOUndspec S VARiable FILE 8.0 'BS17.TPAR'
+BOUndspec S VARiable FILE 8.5 'BS18.TPAR'
+BOUndspec S VARiable FILE 9.0 'BS19.TPAR'
+!
+BOUndspec E VARiable FILE 0.0 'BE1.TPAR'
+BOUndspec E VARiable FILE 0.5 'BE2.TPAR'
+BOUndspec E VARiable FILE 1.0 'BE3.TPAR'
+BOUndspec E VARiable FILE 1.5 'BE4.TPAR'
+BOUndspec E VARiable FILE 2.0 'BE5.TPAR'
+BOUndspec E VARiable FILE 2.5 'BE6.TPAR'
+BOUndspec E VARiable FILE 3.0 'BE7.TPAR'
+BOUndspec E VARiable FILE 3.5 'BE8.TPAR'
+BOUndspec E VARiable FILE 4.0 'BE9.TPAR'
+BOUndspec E VARiable FILE 4.5 'BE10.TPAR'
+BOUndspec E VARiable FILE 5.0 'BE11.TPAR'
+BOUndspec E VARiable FILE 5.5 'BE12.TPAR'
+BOUndspec E VARiable FILE 6.0 'BE13.TPAR'
+BOUndspec E VARiable FILE 6.5 'BE14.TPAR'
+BOUndspec E VARiable FILE 7.0 'BE15.TPAR'
+BOUndspec E VARiable FILE 7.5 'BE16.TPAR'
+BOUndspec E VARiable FILE 8.0 'BE17.TPAR'
+!
+!**********************************PHYSICS***************************************
+!
+!calibration Run (1) Output: Wudam-N2 Wudam-S2 BlSwan1.MAT
+!GEN3 ST6 6.5E-6 8.5E-5 4.0 4.0 UP HWANG VECTAU U10PROXY 35.0 AGROW
+!
+!calibration Run (2) Output: Wudam-N3 Wudam-S3 BlSwan2.MAT
+!GEN3 ST6 4.7E-7 6.6E-6 4.0 4.0 UP HWANG VECTAU U10PROXY 28.0 AGROW
+!
+!calibration Run (3) Output: Wudam-N4 Wudam-S4 BlSwan3.MAT
+!GEN3 ST6 6.5E-6 8.5E-5 4.0 4.0 UP HWANG VECTAU TRUE10 AGROW
+!
+!calibration Run (4) Output: Wudam-N5 Wudam-S5 BlSwan4.MAT
+!GEN3 ST6 6.5E-6 8.5E-5 4.0 4.0 UP HWANG VECTAU U10PROXY 35.0 AGROW
+!
+!WCAP KOMen 2.36e-5 3.02e-3 2. 1. 1.
+!
+!calibration Run (5) Output: Wudam-N6 Wudam-S6 BlSwan5.MAT
+!WCAP KOMen 2.36e-6 3.02e-4 2. 1. 1.
+!
+!calibration Run (6) Output: Wudam-N7 Wudam-S7 BlSwan6.MAT
+!GEN3 ST6 5.7E-8 8.0E-7 4.0 4.0 UP HWANG VECTAU U10PROXY 35.0 AGROW
+!SSWELL ARDhuin 1.2
+!WCAP KOMen 2.36e-3 3.02e-1 2. 1. 1.
+!
+!calibration Run (7) Output: Wudam-N8 Wudam-S8 BlSwan7.MAT
+!GEN3 KOMen 2.36e-5 3.02e-3 DRAG WU AGROW
+!SSWELL ZIEGER 0.00025
+!NEGATINP 0.04
+!WCAP KOMen 2.36e-5 3.02e-3 2. 1. 1.
+!
+!calibration Run (8) Output: Wudam-N9 Wudam-S9 BlSwan8.MAT
+GEN3 KOMen 1.36e-5 2.02e-3 DRAG WU AGROW
+SSWELL ZIEGER 0.00025
+NEGATINP 0.04
+WCAP KOMen 1.36e-5 2.02e-3 2. 1. 1.
+!
+BRE CONstant 1. 0.73
+!
+FRICtion JONswap CONstant 0.038
+!
+DIFFRac 1 0. 0. 1
+!
+!**********************************NUMERICS***************************************
+!
+!***********************************OUTPUT****************************************
+!
+POINts 'Wudam-N' 57.61904 23.87524
+TABLe 'Wudam-N' HEADer 'Wudam-N9' DSPR WIND DEPth HSIGN DIR RTP OUTPUT 20210401.000000 1 HR
+!
+POINts 'Wudam-S' 57.59747 23.81999
+TABLe 'Wudam-S' HEADer 'Wudam-S9' DSPR WIND DEPth HSIGN DIR RTP OUTPUT 20210401.000000 1 HR
+!
+BLOCK 'COMPGRID' NOHEAD 'BlSwan8.MAT' LAY-OUT 3 XP YP WIND DEPth HSIGN DIR RTP OUTPUT 20210401.000100 3 HR
+!
+!****************************************LOCK-UP**************************************
+!
+COMPute NONSTAT 20210401.000000 1 HR 20210531.230000
+!
+STOP
