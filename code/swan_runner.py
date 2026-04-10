@@ -72,6 +72,13 @@ def run_swan(model_dir, input_name='INPUT', swan_cmd='swanrun', nproc=4,
     -------
     subprocess.CompletedProcess
     """
+    # swanrun expects {input_name}.swn — create it if only the bare file exists
+    input_name = input_name.removesuffix('.swn')
+    swn_file = os.path.join(model_dir, f'{input_name}.swn')
+    bare_file = os.path.join(model_dir, input_name)
+    if not os.path.exists(swn_file) and os.path.exists(bare_file):
+        shutil.copy2(bare_file, swn_file)
+
     cmd = f'{swan_cmd} -input {input_name}'
     if nproc > 1:
         cmd += f' -omp {nproc}'

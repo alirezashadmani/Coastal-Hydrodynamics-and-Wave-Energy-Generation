@@ -1,6 +1,6 @@
 !*********************************STARTUP****************************************
 !
-PROJECT  'CalBay_Nested'  'Coarse'
+PROJECT  'CalBay_Nest'  'C'
 !
 SET NAUTical
 !
@@ -63,8 +63,8 @@ DIFFRACtion 1 0. 0. 1
 ! The nested grid covers the high-energy deployment zone:
 !   Origin: (-122.40, 37.60), Size: 0.30 x 0.30 deg, Rotation: 0 deg
 !
-NGRID 'nest_zone' -122.40 37.60 0. 0.30 0.30 60 60
-NESTOUT 'nest_zone' 'nest_boundary.bnd' OUTPUT 20240101.000000 1 HR
+NGRID 'nestzn' -122.40 37.60 0. 0.30 0.30 60 60
+NESTOUT 'nestzn' 'nest_boundary.bnd' OUTPUT 20240101.000000 1 HR
 !
 ! Block output on coarse grid for comparison
 BLOCK 'COMPGRID' NOHEAD 'coarse_block.mat' LAY-OUT 3 XP YP HSIGN RTP DIR DEPTH &

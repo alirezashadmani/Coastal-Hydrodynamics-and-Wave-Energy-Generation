@@ -1,6 +1,6 @@
 !*********************************STARTUP****************************************
 !
-PROJECT  'CalBay_Nested'  'Fine'
+PROJECT  'CalBay_Nest'  'F'
 !
 SET NAUTical
 !
@@ -34,8 +34,8 @@ READinp WInd 1.0 'wind.inp' 3 0 FREE
 BOUnd SHAPespec JONswap 3.3 PEAK DSPR DEGRees
 !
 ! --- NESTINP: read spectral boundary from the coarse (parent) run ---
-NGRID 'nest_zone' -122.40 37.60 0. 0.30 0.30 60 60
-NESTINP 'nest_zone' 'nest_boundary.bnd' FREE
+NGRID 'nestzn' -122.40 37.60 0. 0.30 0.30 60 60
+NESTINP 'nestzn' 'nest_boundary.bnd'
 !
 !***********************************PHYSICS**************************************
 !
