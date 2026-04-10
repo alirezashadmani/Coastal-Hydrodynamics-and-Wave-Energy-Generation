@@ -19,6 +19,14 @@ build/
 norm_end
 swaninit
 
+# Large data files (bathymetry, wind input, wave data, tables)
+*.asc
+*.inp
+*.nc
+*.tab
+*.TPAR
+*.bnd
+
 # IDE
 .vscode/
 .idea/
@@ -39,5 +47,3 @@ Oman/*.ipynb
 sources/
 figs/
 swan4151/
-/Users/alirezashadmani/Desktop/DevOps/wiley_textbook_figs/california_bay_nested.F/nest_boundary.bnd
-*.bnd

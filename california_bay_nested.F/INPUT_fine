@@ -34,8 +34,9 @@ READinp WInd 1.0 'wind.inp' 3 0 FREE
 BOUnd SHAPespec JONswap 3.3 PEAK DSPR DEGRees
 !
 ! --- NESTINP: read spectral boundary from the coarse (parent) run ---
-NGRID 'nestzn' -122.40 37.60 0. 0.30 0.30 60 60
-NESTINP 'nestzn' 'nest_boundary.bnd'
+! Note: NGRID is NOT used in the child model — boundary spectra are applied
+! along the CGRID edges via BOUNdnest1
+BOUNdnest1 NESTing 'nest_boundary.bnd' CLOSed
 !
 !***********************************PHYSICS**************************************
 !

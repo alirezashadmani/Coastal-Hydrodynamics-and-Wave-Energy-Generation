@@ -1,0 +1,3811 @@
+1
+
+                    Execution started at 20260410.215814         
+
+
+
+                    ---------------------------------------
+                                     SWAN
+                    SIMULATION OF WAVES IN NEAR SHORE AREAS
+                             VERSION NUMBER 41.51               
+                    ---------------------------------------
+
+
+    
+ !*********************************STARTUP****************************************
+    
+ !
+    
+ PROJECT  'CalBay_Nest'  'C'
+    
+ !
+    
+ SET NAUTical
+    
+ !
+    
+ MODE DYNAMIC TWODimensional
+    
+ !
+    
+ COORDinates SPHErical CCM
+    
+ !
+    
+ !*****************************MODEL DESCRIPTION**********************************
+    
+ !
+    
+ ! PARENT (coarse) grid: same as the original California Bay model
+    
+ ! Rotated 22.467 deg, origin at SF Bay entrance
+    
+ ! 120 x 216 cells at ~0.00416 deg resolution (~460 m)
+    
+ !
+    
+ CGRID REGular -122.3018 37.2947 22.467 0.4992 0.8986 120 216 CIRcle 36 0.04 0.5 30
+ Resolution in sigma-space: df/f =  0.0878
+    
+ !
+    
+ !*****************************INPUT GRIDS & DATA*********************************
+    
+ !
+    
+ ! Bathymetry from GEBCO (1680 x 1920 cells, 0.00417 deg)
+    
+ INPgrid BOTtom REGular -125.0 34.0 0. 1679 1919 0.00416667 0.00416667 EXCeption -32767.
+    
+ READinp BOTtom 1.0 'GEBCO.asc' 1 6 FREE
+ **  Heading lines file GEBCO.asc **
+ -> ncols        1680                                                               
+ -> nrows        1920                                                               
+ -> xllcorner    -125.000000000000                                                  
+ -> yllcorner    34.000000000000                                                    
+ -> cellsize     0.004166666667                                                     
+ -> NODATA_value -32767                                                             
+    
+ !
+    
+ ! Wind from ERA5 (29 lon x 33 lat at 0.25 deg, hourly Jan-Feb 2024)
+    
+ INPgrid WInd REGular -125.0 34.0 0. 28 32 0.25 0.25 &
+        NONSTATionary 20240101.000000 1 HR 20240229.230000
+    
+ READinp WInd 1.0 'wind.inp' 3 0 FREE
+    
+ !
+    
+ !*************************BOUNDARY & INITIAL CONDITION***************************
+    
+ !
+    
+ BOUnd SHAPespec JONswap 3.3 PEAK DSPR DEGRees
+    
+ !
+    
+ ! Wave boundary on western (ocean-facing) side from ERA5 TPAR
+    
+ BOUndspec SIDE W CCW VARiable FILE 0.0 'BW2.TPAR'
+    
+ !
+    
+ !***********************************PHYSICS**************************************
+    
+ !
+    
+ ! Third-generation source terms (Komen et al.)
+    
+ GEN3 KOMen 1.36e-5 2.02e-3 DRAG WU AGROW
+    
+ !
+    
+ ! Swell dissipation (Zieger et al.)
+    
+ SSWELL ZIEGER 0.00025
+    
+ NEGATINP 0.04
+    
+ !
+    
+ ! Whitecapping
+    
+ WCAP KOMen 1.36e-5 2.02e-3 2. 1. 1.
+    
+ !
+    
+ ! Depth-induced breaking (Battjes & Janssen)
+    
+ BREaking CONstant 1. 0.73
+    
+ !
+    
+ ! Bottom friction (JONSWAP)
+    
+ FRICtion JONswap CONstant 0.038
+    
+ !
+    
+ ! Diffraction
+    
+ DIFFRACtion 1 0. 0. 1
+    
+ !
+    
+ !**********************************NUMERICS**************************************
+    
+ !
+    
+ !***********************************OUTPUT***************************************
+    
+ !
+    
+ ! --- NESTOUT: save spectral boundary for the nested (fine) grid ---
+    
+ ! The nested grid covers the high-energy deployment zone:
+    
+ !   Origin: (-122.40, 37.60), Size: 0.30 x 0.30 deg, Rotation: 0 deg
+    
+ !
+    
+ NGRID 'nestzn' -122.40 37.60 0. 0.30 0.30 60 60
+    
+ NESTOUT 'nestzn' 'nest_boundary.bnd' OUTPUT 20240101.000000 1 HR
+    
+ !
+    
+ ! Block output on coarse grid for comparison
+    
+ BLOCK 'COMPGRID' NOHEAD 'coarse_block.mat' LAY-OUT 3 XP YP HSIGN RTP DIR DEPTH &
+       OUTPUT 20240101.030000 6 HR
+    
+ !
+    
+ !***********************************COMPUTE**************************************
+    
+ !
+    
+ COMPute NONSTATionary 20240101.000000 1 HR 20240229.230000
+ Boundary data type TPAR processed, time:           0.
+ Time of computation ->  20240101.010000      in sec:       3600.
+ Boundary data type TPAR processed, time:        3600.
+
+----------------------------------------------------------------
+                  COMPUTATIONAL PART OF SWAN
+----------------------------------------------------------------
+
+ Gridresolution       : MXC             121 MYC            217
+                      : MCGRD         26258
+                      : MSC              31 MDC             36
+                      : MTC            1439
+                      : NSTATC            1 ITERMX           1
+ Propagation flags    : ITFRE             1 IREFR            1
+ Source term flags    : IBOT              1 ISURF            1
+                      : IWCAP             1 IWIND            3
+                      : ITRIAD            0 IQUAD            2
+                      : IBRAG             0 IQCM             0
+                      : IVEG              0 ITURBV           0
+                      : IMUD              0 IICE             0
+ Spatial step         : DX       0.4160E-02 DY      0.4160E-02
+ Spectral bin         : df/f     0.8784E-01 DDIR    0.1000E+02
+ Physical constants   : GRAV     0.9810E+01 RHO     0.1025E+04
+ Wind input           : WSPEED   0.0000E+00 DIR     0.0000E+00
+                      : ICEWIND  0.00
+ Tail parameters      : E(f)     0.4000E+01 E(k)    0.2500E+01
+                      : A(f)     0.5000E+01 A(k)    0.3000E+01
+ Accuracy parameters  : DREL     0.1000E-01 NPNTS   0.9950E+02
+                      : DHABS    0.5000E-02 CURVAT  0.5000E-02
+                      : GRWMX    0.1000E+00
+ Drying/flooding      : LEVEL    0.0000E+00 DEPMIN  0.5000E-01
+ The nautical  convention for wind and wave directions is used
+ Scheme for geographic propagation is BSBT  
+ Scheme geogr. space  : PROPSC            1 ICMAX            5
+ Scheme spectral space: CSS      0.5000E+00 CDD     0.5000E+00
+ Current is off
+ Quadruplets          : IQUAD             2
+                      : LAMBDA   0.2500E+00 CNL4    0.3000E+08
+                      : CSH1     0.5500E+01 CSH2    0.8330E+00
+                      : CSH3    -0.1250E+01
+ Maximum Ursell nr for Snl4 :    0.1000E+02
+ Triads is off
+ Bragg scattering is off
+ QC scattering is off
+ Surfbeat (IEM) is off
+ JONSWAP (`73)        : GAMMA    0.3800E-01
+ Vegetation is off
+ Turbulence is off
+ Fluid mud is off
+ Dissipation by sea ice is off
+ W-cap Komen (`84)    : EMPCOF (CDS2):   0.1360E-04
+ W-cap Komen (`84)    : APM (STPM)   :   0.2020E-02
+ W-cap Komen (`84)    : POWST        :   0.2000E+01
+ W-cap Komen (`84)    : DELTA        :   0.1000E+01
+ W-cap Komen (`84)    : POWK         :   0.1000E+01
+ Wind drag is Wu
+ Snyder/Komen wind input
+ Battjes&Janssen (`78): ALPHA    0.1000E+01 GAMMA   0.7300E+00
+ Set-up is off
+ Diffraction          : SMPAR    0.0000E+00 SMNUM            0
+ Janssen (`89,`90)    : ALPHA    0.1000E-01 KAPPA   0.4100E+00
+ Janssen (`89,`90)    : RHOA     0.1280E+01 RHOW    0.1025E+04
+
+ 1st and 2nd gen. wind: CF10     0.1880E+03 CF20    0.5900E+00
+                      : CF30     0.1200E+00 CF40    0.2500E+03
+                      : CF50     0.2300E-02 CF60   -0.2230E+00
+                      : CF70     0.0000E+00 CF80   -0.5600E+00
+                      : RHOAW    0.1249E-02 EDMLPM  0.3600E-02
+                      : CDRAG    0.1230E-02 UMIN    0.1000E+01
+                      : LIM_PM   0.1300E+00
+
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.31       0.00       1.00
+     1   137    138       2.31       0.00       1.00
+     1   136    137       2.31       0.00       1.00
+     1   135    136       2.31       0.00       1.00
+     1   134    135       2.31       0.00       1.00
+     1   133    134       2.31       0.00       1.00
+     1   132    133       2.31       0.00       1.00
+     1   131    132       2.31       0.00       1.00
+     1   130    131       2.31       0.00       1.00
+     1   129    130       2.31       1.74       0.25
+
+ Time of computation ->  20240101.020000      in sec:       7200.
+ Boundary data type TPAR processed, time:        7200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.27       0.00       1.00
+     1   137    138       2.27       0.00       1.00
+     1   136    137       2.27       0.00       1.00
+     1   135    136       2.27       0.00       1.00
+     1   134    135       2.27       0.00       1.00
+     1   133    134       2.27       0.00       1.00
+     1   132    133       2.27       0.00       1.00
+     1   131    132       2.27       0.00       1.00
+     1   130    131       2.27       0.00       1.00
+     1   129    130       2.27       1.74       0.23
+
+ Time of computation ->  20240101.030000      in sec:      10800.
+ Boundary data type TPAR processed, time:       10800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.21       0.00       1.00
+     1   137    138       2.21       0.00       1.00
+     1   136    137       2.21       0.00       1.00
+     1   135    136       2.21       0.00       1.00
+     1   134    135       2.21       0.00       1.00
+     1   133    134       2.21       0.00       1.00
+     1   132    133       2.21       0.00       1.00
+     1   131    132       2.21       0.00       1.00
+     1   130    131       2.21       0.00       1.00
+     1   129    130       2.21       1.74       0.21
+
+ Time of computation ->  20240101.040000      in sec:      14400.
+ Boundary data type TPAR processed, time:       14400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.17       0.00       1.00
+     1   137    138       2.17       0.00       1.00
+     1   136    137       2.17       0.00       1.00
+     1   135    136       2.17       0.00       1.00
+     1   134    135       2.17       0.00       1.00
+     1   133    134       2.17       0.00       1.00
+     1   132    133       2.17       0.00       1.00
+     1   131    132       2.17       0.00       1.00
+     1   130    131       2.17       0.00       1.00
+     1   129    130       2.17       1.74       0.20
+
+ Time of computation ->  20240101.050000      in sec:      18000.
+ Boundary data type TPAR processed, time:       18000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.13       0.00       1.00
+     1   137    138       2.13       0.00       1.00
+     1   136    137       2.13       0.00       1.00
+     1   135    136       2.13       0.00       1.00
+     1   134    135       2.13       0.00       1.00
+     1   133    134       2.13       0.00       1.00
+     1   132    133       2.13       0.00       1.00
+     1   131    132       2.13       0.00       1.00
+     1   130    131       2.13       0.00       1.00
+     1   129    130       2.13       1.74       0.18
+
+ Time of computation ->  20240101.060000      in sec:      21600.
+ Boundary data type TPAR processed, time:       21600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.12       0.00       1.00
+     1   137    138       2.12       0.00       1.00
+     1   136    137       2.12       0.00       1.00
+     1   135    136       2.12       0.00       1.00
+     1   134    135       2.12       0.00       1.00
+     1   133    134       2.12       0.00       1.00
+     1   132    133       2.12       0.00       1.00
+     1   131    132       2.12       0.00       1.00
+     1   130    131       2.12       0.00       1.00
+     1   129    130       2.12       1.74       0.18
+
+ Time of computation ->  20240101.070000      in sec:      25200.
+ Boundary data type TPAR processed, time:       25200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.12       0.00       1.00
+     1   137    138       2.12       0.00       1.00
+     1   136    137       2.12       0.00       1.00
+     1   135    136       2.12       0.00       1.00
+     1   134    135       2.12       0.00       1.00
+     1   133    134       2.12       0.00       1.00
+     1   132    133       2.12       0.00       1.00
+     1   131    132       2.12       0.00       1.00
+     1   130    131       2.12       0.00       1.00
+     1   129    130       2.12       1.74       0.18
+
+ Time of computation ->  20240101.080000      in sec:      28800.
+ Boundary data type TPAR processed, time:       28800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.13       0.00       1.00
+     1   137    138       2.13       0.00       1.00
+     1   136    137       2.13       0.00       1.00
+     1   135    136       2.13       0.00       1.00
+     1   134    135       2.13       0.00       1.00
+     1   133    134       2.13       0.00       1.00
+     1   132    133       2.13       0.00       1.00
+     1   131    132       2.13       0.00       1.00
+     1   130    131       2.13       0.00       1.00
+     1   129    130       2.13       1.74       0.18
+
+ Time of computation ->  20240101.090000      in sec:      32400.
+ Boundary data type TPAR processed, time:       32400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.15       0.00       1.00
+     1   137    138       2.15       0.00       1.00
+     1   136    137       2.15       0.00       1.00
+     1   135    136       2.15       0.00       1.00
+     1   134    135       2.15       0.00       1.00
+     1   133    134       2.15       0.00       1.00
+     1   132    133       2.15       0.00       1.00
+     1   131    132       2.15       0.00       1.00
+     1   130    131       2.15       0.00       1.00
+     1   129    130       2.15       1.74       0.19
+
+ Time of computation ->  20240101.100000      in sec:      36000.
+ Boundary data type TPAR processed, time:       36000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.19       0.00       1.00
+     1   137    138       2.19       0.00       1.00
+     1   136    137       2.19       0.00       1.00
+     1   135    136       2.19       0.00       1.00
+     1   134    135       2.19       0.00       1.00
+     1   133    134       2.19       0.00       1.00
+     1   132    133       2.19       0.00       1.00
+     1   131    132       2.19       0.00       1.00
+     1   130    131       2.19       0.00       1.00
+     1   129    130       2.19       1.74       0.20
+
+ Time of computation ->  20240101.110000      in sec:      39600.
+ Boundary data type TPAR processed, time:       39600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.23       0.00       1.00
+     1   137    138       2.23       0.00       1.00
+     1   136    137       2.23       0.00       1.00
+     1   135    136       2.23       0.00       1.00
+     1   134    135       2.23       0.00       1.00
+     1   133    134       2.23       0.00       1.00
+     1   132    133       2.23       0.00       1.00
+     1   131    132       2.23       0.00       1.00
+     1   130    131       2.23       0.00       1.00
+     1   129    130       2.23       1.74       0.22
+
+ Time of computation ->  20240101.120000      in sec:      43200.
+ Boundary data type TPAR processed, time:       43200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.27       0.00       1.00
+     1   137    138       2.27       0.00       1.00
+     1   136    137       2.27       0.00       1.00
+     1   135    136       2.27       0.00       1.00
+     1   134    135       2.27       0.00       1.00
+     1   133    134       2.27       0.00       1.00
+     1   132    133       2.27       0.00       1.00
+     1   131    132       2.27       0.00       1.00
+     1   130    131       2.27       0.00       1.00
+     1   129    130       2.27       1.74       0.23
+
+ Time of computation ->  20240101.130000      in sec:      46800.
+ Boundary data type TPAR processed, time:       46800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.33       0.00       1.00
+     1   137    138       2.33       0.00       1.00
+     1   136    137       2.33       0.00       1.00
+     1   135    136       2.33       0.00       1.00
+     1   134    135       2.33       0.00       1.00
+     1   133    134       2.33       0.00       1.00
+     1   132    133       2.33       0.00       1.00
+     1   131    132       2.33       0.00       1.00
+     1   130    131       2.33       0.00       1.00
+     1   129    130       2.33       1.74       0.25
+
+ Time of computation ->  20240101.140000      in sec:      50400.
+ Boundary data type TPAR processed, time:       50400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.38       0.00       1.00
+     1   137    138       2.38       0.00       1.00
+     1   136    137       2.38       0.00       1.00
+     1   135    136       2.38       0.00       1.00
+     1   134    135       2.38       0.00       1.00
+     1   133    134       2.38       0.00       1.00
+     1   132    133       2.38       0.00       1.00
+     1   131    132       2.38       0.00       1.00
+     1   130    131       2.38       0.00       1.00
+     1   129    130       2.38       1.74       0.27
+
+ Time of computation ->  20240101.150000      in sec:      54000.
+ Boundary data type TPAR processed, time:       54000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.44       0.00       1.00
+     1   137    138       2.44       0.00       1.00
+     1   136    137       2.44       0.00       1.00
+     1   135    136       2.44       0.00       1.00
+     1   134    135       2.44       0.00       1.00
+     1   133    134       2.44       0.00       1.00
+     1   132    133       2.44       0.00       1.00
+     1   131    132       2.44       0.00       1.00
+     1   130    131       2.44       0.00       1.00
+     1   129    130       2.44       1.74       0.28
+
+ Time of computation ->  20240101.160000      in sec:      57600.
+ Boundary data type TPAR processed, time:       57600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.48       0.00       1.00
+     1   137    138       2.48       0.00       1.00
+     1   136    137       2.48       0.00       1.00
+     1   135    136       2.48       0.00       1.00
+     1   134    135       2.48       0.00       1.00
+     1   133    134       2.48       0.00       1.00
+     1   132    133       2.48       0.00       1.00
+     1   131    132       2.48       0.00       1.00
+     1   130    131       2.48       0.00       1.00
+     1   129    130       2.48       1.74       0.30
+
+ Time of computation ->  20240101.170000      in sec:      61200.
+ Boundary data type TPAR processed, time:       61200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.51       0.00       1.00
+     1   137    138       2.51       0.00       1.00
+     1   136    137       2.51       0.00       1.00
+     1   135    136       2.51       0.00       1.00
+     1   134    135       2.51       0.00       1.00
+     1   133    134       2.51       0.00       1.00
+     1   132    133       2.51       0.00       1.00
+     1   131    132       2.51       0.00       1.00
+     1   130    131       2.51       0.00       1.00
+     1   129    130       2.51       1.74       0.30
+
+ Time of computation ->  20240101.180000      in sec:      64800.
+ Boundary data type TPAR processed, time:       64800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.54       0.00       1.00
+     1   137    138       2.54       0.00       1.00
+     1   136    137       2.54       0.00       1.00
+     1   135    136       2.54       0.00       1.00
+     1   134    135       2.54       0.00       1.00
+     1   133    134       2.54       0.00       1.00
+     1   132    133       2.54       0.00       1.00
+     1   131    132       2.54       0.00       1.00
+     1   130    131       2.54       0.00       1.00
+     1   129    130       2.54       1.74       0.31
+
+ Time of computation ->  20240101.190000      in sec:      68400.
+ Boundary data type TPAR processed, time:       68400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.56       0.00       1.00
+     1   137    138       2.56       0.00       1.00
+     1   136    137       2.56       0.00       1.00
+     1   135    136       2.56       0.00       1.00
+     1   134    135       2.56       0.00       1.00
+     1   133    134       2.56       0.00       1.00
+     1   132    133       2.56       0.00       1.00
+     1   131    132       2.56       0.00       1.00
+     1   130    131       2.56       0.00       1.00
+     1   129    130       2.56       1.74       0.32
+
+ Time of computation ->  20240101.200000      in sec:      72000.
+ Boundary data type TPAR processed, time:       72000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.56       0.00       1.00
+     1   137    138       2.56       0.00       1.00
+     1   136    137       2.56       0.00       1.00
+     1   135    136       2.56       0.00       1.00
+     1   134    135       2.56       0.00       1.00
+     1   133    134       2.56       0.00       1.00
+     1   132    133       2.56       0.00       1.00
+     1   131    132       2.56       0.00       1.00
+     1   130    131       2.56       0.00       1.00
+     1   129    130       2.56       1.74       0.32
+
+ Time of computation ->  20240101.210000      in sec:      75600.
+ Boundary data type TPAR processed, time:       75600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.55       0.00       1.00
+     1   137    138       2.55       0.00       1.00
+     1   136    137       2.55       0.00       1.00
+     1   135    136       2.55       0.00       1.00
+     1   134    135       2.55       0.00       1.00
+     1   133    134       2.55       0.00       1.00
+     1   132    133       2.55       0.00       1.00
+     1   131    132       2.55       0.00       1.00
+     1   130    131       2.55       0.00       1.00
+     1   129    130       2.55       1.74       0.32
+
+ Time of computation ->  20240101.220000      in sec:      79200.
+ Boundary data type TPAR processed, time:       79200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.55       0.00       1.00
+     1   137    138       2.55       0.00       1.00
+     1   136    137       2.55       0.00       1.00
+     1   135    136       2.55       0.00       1.00
+     1   134    135       2.55       0.00       1.00
+     1   133    134       2.55       0.00       1.00
+     1   132    133       2.55       0.00       1.00
+     1   131    132       2.55       0.00       1.00
+     1   130    131       2.55       0.00       1.00
+     1   129    130       2.55       1.74       0.32
+
+ Time of computation ->  20240101.230000      in sec:      82800.
+ Boundary data type TPAR processed, time:       82800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.53       0.00       1.00
+     1   137    138       2.53       0.00       1.00
+     1   136    137       2.53       0.00       1.00
+     1   135    136       2.53       0.00       1.00
+     1   134    135       2.53       0.00       1.00
+     1   133    134       2.53       0.00       1.00
+     1   132    133       2.53       0.00       1.00
+     1   131    132       2.53       0.00       1.00
+     1   130    131       2.53       0.00       1.00
+     1   129    130       2.53       1.74       0.31
+
+ Time of computation ->  20240102.000000      in sec:      86400.
+ Boundary data type TPAR processed, time:       86400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.50       0.00       1.00
+     1   137    138       2.50       0.00       1.00
+     1   136    137       2.50       0.00       1.00
+     1   135    136       2.50       0.00       1.00
+     1   134    135       2.50       0.00       1.00
+     1   133    134       2.50       0.00       1.00
+     1   132    133       2.50       0.00       1.00
+     1   131    132       2.50       0.00       1.00
+     1   130    131       2.50       0.00       1.00
+     1   129    130       2.50       1.74       0.30
+
+ Time of computation ->  20240102.010000      in sec:      90000.
+ Boundary data type TPAR processed, time:       90000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.47       0.00       1.00
+     1   137    138       2.47       0.00       1.00
+     1   136    137       2.47       0.00       1.00
+     1   135    136       2.47       0.00       1.00
+     1   134    135       2.47       0.00       1.00
+     1   133    134       2.47       0.00       1.00
+     1   132    133       2.47       0.00       1.00
+     1   131    132       2.47       0.00       1.00
+     1   130    131       2.47       0.00       1.00
+     1   129    130       2.47       1.74       0.29
+
+ Time of computation ->  20240102.020000      in sec:      93600.
+ Boundary data type TPAR processed, time:       93600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.42       0.00       1.00
+     1   137    138       2.42       0.00       1.00
+     1   136    137       2.42       0.00       1.00
+     1   135    136       2.42       0.00       1.00
+     1   134    135       2.42       0.00       1.00
+     1   133    134       2.42       0.00       1.00
+     1   132    133       2.42       0.00       1.00
+     1   131    132       2.42       0.00       1.00
+     1   130    131       2.42       0.00       1.00
+     1   129    130       2.42       1.74       0.28
+
+ Time of computation ->  20240102.030000      in sec:      97200.
+ Boundary data type TPAR processed, time:       97200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.35       0.00       1.00
+     1   137    138       2.35       0.00       1.00
+     1   136    137       2.35       0.00       1.00
+     1   135    136       2.35       0.00       1.00
+     1   134    135       2.35       0.00       1.00
+     1   133    134       2.35       0.00       1.00
+     1   132    133       2.35       0.00       1.00
+     1   131    132       2.35       0.00       1.00
+     1   130    131       2.35       0.00       1.00
+     1   129    130       2.35       1.74       0.26
+
+ Time of computation ->  20240102.040000      in sec:     100800.
+ Boundary data type TPAR processed, time:      100800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.29       0.00       1.00
+     1   137    138       2.29       0.00       1.00
+     1   136    137       2.29       0.00       1.00
+     1   135    136       2.29       0.00       1.00
+     1   134    135       2.29       0.00       1.00
+     1   133    134       2.29       0.00       1.00
+     1   132    133       2.29       0.00       1.00
+     1   131    132       2.29       0.00       1.00
+     1   130    131       2.29       0.00       1.00
+     1   129    130       2.29       1.74       0.24
+
+ Time of computation ->  20240102.050000      in sec:     104400.
+ Boundary data type TPAR processed, time:      104400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.19       0.00       1.00
+     1   137    138       2.19       0.00       1.00
+     1   136    137       2.19       0.00       1.00
+     1   135    136       2.19       0.00       1.00
+     1   134    135       2.19       0.00       1.00
+     1   133    134       2.19       0.00       1.00
+     1   132    133       2.19       0.00       1.00
+     1   131    132       2.19       0.00       1.00
+     1   130    131       2.19       0.00       1.00
+     1   129    130       2.19       1.74       0.20
+
+ Time of computation ->  20240102.060000      in sec:     108000.
+ Boundary data type TPAR processed, time:      108000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.09       0.00       1.00
+     1   137    138       2.09       0.00       1.00
+     1   136    137       2.09       0.00       1.00
+     1   135    136       2.09       0.00       1.00
+     1   134    135       2.09       0.00       1.00
+     1   133    134       2.09       0.00       1.00
+     1   132    133       2.09       0.00       1.00
+     1   131    132       2.09       0.00       1.00
+     1   130    131       2.09       0.00       1.00
+     1   129    130       2.09       1.74       0.16
+
+ Time of computation ->  20240102.070000      in sec:     111600.
+ Boundary data type TPAR processed, time:      111600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.98       0.00       1.00
+     1   137    138       1.98       0.00       1.00
+     1   136    137       1.98       0.00       1.00
+     1   135    136       1.98       0.00       1.00
+     1   134    135       1.98       0.00       1.00
+     1   133    134       1.98       0.00       1.00
+     1   132    133       1.98       0.00       1.00
+     1   131    132       1.98       0.00       1.00
+     1   130    131       1.98       0.00       1.00
+     1   129    130       1.98       1.74       0.12
+
+ Time of computation ->  20240102.080000      in sec:     115200.
+ Boundary data type TPAR processed, time:      115200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.89       0.00       1.00
+     1   137    138       1.89       0.00       1.00
+     1   136    137       1.89       0.00       1.00
+     1   135    136       1.89       0.00       1.00
+     1   134    135       1.89       0.00       1.00
+     1   133    134       1.89       0.00       1.00
+     1   132    133       1.89       0.00       1.00
+     1   131    132       1.89       0.00       1.00
+     1   130    131       1.89       0.00       1.00
+
+ Time of computation ->  20240102.090000      in sec:     118800.
+ Boundary data type TPAR processed, time:      118800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.80       0.00       1.00
+     1   137    138       1.80       0.00       1.00
+     1   136    137       1.80       0.00       1.00
+     1   135    136       1.80       0.00       1.00
+     1   134    135       1.80       0.00       1.00
+     1   133    134       1.80       0.00       1.00
+     1   132    133       1.80       0.00       1.00
+     1   131    132       1.80       0.00       1.00
+     1   130    131       1.80       0.00       1.00
+
+ Time of computation ->  20240102.100000      in sec:     122400.
+ Boundary data type TPAR processed, time:      122400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.72       0.00       1.00
+     1   137    138       1.72       0.00       1.00
+     1   136    137       1.72       0.00       1.00
+     1   135    136       1.72       0.00       1.00
+     1   134    135       1.72       0.00       1.00
+     1   133    134       1.72       0.00       1.00
+     1   132    133       1.72       0.00       1.00
+     1   131    132       1.72       0.00       1.00
+     1   130    131       1.72       0.00       1.00
+
+ Time of computation ->  20240102.110000      in sec:     126000.
+ Boundary data type TPAR processed, time:      126000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.68       0.00       1.00
+     1   137    138       1.68       0.00       1.00
+     1   136    137       1.68       0.00       1.00
+     1   135    136       1.68       0.00       1.00
+     1   134    135       1.68       0.00       1.00
+     1   133    134       1.68       0.00       1.00
+     1   132    133       1.68       0.00       1.00
+     1   131    132       1.68       0.00       1.00
+     1   130    131       1.68       0.00       1.00
+
+ Time of computation ->  20240102.120000      in sec:     129600.
+ Boundary data type TPAR processed, time:      129600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.65       0.00       1.00
+     1   137    138       1.65       0.00       1.00
+     1   136    137       1.65       0.00       1.00
+     1   135    136       1.65       0.00       1.00
+     1   134    135       1.65       0.00       1.00
+     1   133    134       1.65       0.00       1.00
+     1   132    133       1.65       0.00       1.00
+     1   131    132       1.65       0.00       1.00
+     1   130    131       1.65       0.00       1.00
+
+ Time of computation ->  20240102.130000      in sec:     133200.
+ Boundary data type TPAR processed, time:      133200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.64       0.00       1.00
+     1   137    138       1.64       0.00       1.00
+     1   136    137       1.64       0.00       1.00
+     1   135    136       1.64       0.00       1.00
+     1   134    135       1.64       0.00       1.00
+     1   133    134       1.64       0.00       1.00
+     1   132    133       1.64       0.00       1.00
+     1   131    132       1.64       0.00       1.00
+     1   130    131       1.64       0.00       1.00
+
+ Time of computation ->  20240102.140000      in sec:     136800.
+ Boundary data type TPAR processed, time:      136800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.70       0.00       1.00
+     1   137    138       1.70       0.00       1.00
+     1   136    137       1.70       0.00       1.00
+     1   135    136       1.70       0.00       1.00
+     1   134    135       1.70       0.00       1.00
+     1   133    134       1.70       0.00       1.00
+     1   132    133       1.70       0.00       1.00
+     1   131    132       1.70       0.00       1.00
+     1   130    131       1.70       0.00       1.00
+
+ Time of computation ->  20240102.150000      in sec:     140400.
+ Boundary data type TPAR processed, time:      140400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.81       0.00       1.00
+     1   137    138       1.81       0.00       1.00
+     1   136    137       1.81       0.00       1.00
+     1   135    136       1.81       0.00       1.00
+     1   134    135       1.81       0.00       1.00
+     1   133    134       1.81       0.00       1.00
+     1   132    133       1.81       0.00       1.00
+     1   131    132       1.81       0.00       1.00
+     1   130    131       1.81       0.00       1.00
+
+ Time of computation ->  20240102.160000      in sec:     144000.
+ Boundary data type TPAR processed, time:      144000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.96       0.00       1.00
+     1   137    138       1.96       0.00       1.00
+     1   136    137       1.96       0.00       1.00
+     1   135    136       1.96       0.00       1.00
+     1   134    135       1.96       0.00       1.00
+     1   133    134       1.96       0.00       1.00
+     1   132    133       1.96       0.00       1.00
+     1   131    132       1.96       0.00       1.00
+     1   130    131       1.96       0.00       1.00
+     1   129    130       1.96       1.74       0.11
+
+ Time of computation ->  20240102.170000      in sec:     147600.
+ Boundary data type TPAR processed, time:      147600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.08       0.00       1.00
+     1   137    138       2.08       0.00       1.00
+     1   136    137       2.08       0.00       1.00
+     1   135    136       2.08       0.00       1.00
+     1   134    135       2.08       0.00       1.00
+     1   133    134       2.08       0.00       1.00
+     1   132    133       2.08       0.00       1.00
+     1   131    132       2.08       0.00       1.00
+     1   130    131       2.08       0.00       1.00
+     1   129    130       2.08       1.74       0.16
+
+ Time of computation ->  20240102.180000      in sec:     151200.
+ Boundary data type TPAR processed, time:      151200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.95       0.00       1.00
+     1   137    138       1.95       0.00       1.00
+     1   136    137       1.95       0.00       1.00
+     1   135    136       1.95       0.00       1.00
+     1   134    135       1.95       0.00       1.00
+     1   133    134       1.95       0.00       1.00
+     1   132    133       1.95       0.00       1.00
+     1   131    132       1.95       0.00       1.00
+     1   130    131       1.95       0.00       1.00
+     1   129    130       1.95       1.74       0.11
+
+ Time of computation ->  20240102.190000      in sec:     154800.
+ Boundary data type TPAR processed, time:      154800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       0.95       0.00       1.00
+     1   137    138       0.95       0.00       1.00
+     1   136    137       0.95       0.00       1.00
+     1   135    136       0.95       0.00       1.00
+     1   134    135       0.95       0.00       1.00
+     1   133    134       0.95       0.00       1.00
+     1   132    133       0.95       0.00       1.00
+     1   131    132       0.95       0.00       1.00
+     1   130    131       0.95       0.00       1.00
+
+ Time of computation ->  20240102.200000      in sec:     158400.
+ Boundary data type TPAR processed, time:      158400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.47       0.00       1.00
+     1   137    138       1.47       0.00       1.00
+     1   136    137       1.47       0.00       1.00
+     1   135    136       1.47       0.00       1.00
+     1   134    135       1.47       0.00       1.00
+     1   133    134       1.47       0.00       1.00
+     1   132    133       1.47       0.00       1.00
+     1   131    132       1.47       0.00       1.00
+     1   130    131       1.47       0.00       1.00
+
+ Time of computation ->  20240102.210000      in sec:     162000.
+ Boundary data type TPAR processed, time:      162000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.07       0.00       1.00
+     1   137    138       1.07       0.00       1.00
+     1   136    137       1.07       0.00       1.00
+     1   135    136       1.07       0.00       1.00
+     1   134    135       1.07       0.00       1.00
+     1   133    134       1.07       0.00       1.00
+     1   132    133       1.07       0.00       1.00
+     1   131    132       1.07       0.00       1.00
+     1   130    131       1.07       0.00       1.00
+
+ Time of computation ->  20240102.220000      in sec:     165600.
+ Boundary data type TPAR processed, time:      165600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.65       0.00       1.00
+     1   137    138       1.65       0.00       1.00
+     1   136    137       1.65       0.00       1.00
+     1   135    136       1.65       0.00       1.00
+     1   134    135       1.65       0.00       1.00
+     1   133    134       1.65       0.00       1.00
+     1   132    133       1.65       0.00       1.00
+     1   131    132       1.65       0.00       1.00
+     1   130    131       1.65       0.00       1.00
+
+ Time of computation ->  20240102.230000      in sec:     169200.
+ Boundary data type TPAR processed, time:      169200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.05       0.00       1.00
+     1   137    138       2.05       0.00       1.00
+     1   136    137       2.05       0.00       1.00
+     1   135    136       2.05       0.00       1.00
+     1   134    135       2.05       0.00       1.00
+     1   133    134       2.05       0.00       1.00
+     1   132    133       2.05       0.00       1.00
+     1   131    132       2.05       0.00       1.00
+     1   130    131       2.05       0.00       1.00
+     1   129    130       2.05       1.74       0.15
+
+ Time of computation ->  20240103.000000      in sec:     172800.
+ Boundary data type TPAR processed, time:      172800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       0.81       0.00       1.00
+     1   137    138       0.81       0.00       1.00
+     1   136    137       0.81       0.00       1.00
+     1   135    136       0.81       0.00       1.00
+     1   134    135       0.81       0.00       1.00
+     1   133    134       0.81       0.00       1.00
+     1   132    133       0.81       0.00       1.00
+     1   131    132       0.81       0.00       1.00
+     1   130    131       0.81       0.00       1.00
+
+ Time of computation ->  20240103.010000      in sec:     176400.
+ Boundary data type TPAR processed, time:      176400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.90       0.00       1.00
+     1   137    138       1.90       0.00       1.00
+     1   136    137       1.90       0.00       1.00
+     1   135    136       1.90       0.00       1.00
+     1   134    135       1.90       0.00       1.00
+     1   133    134       1.90       0.00       1.00
+     1   132    133       1.90       0.00       1.00
+     1   131    132       1.90       0.00       1.00
+     1   130    131       1.90       0.00       1.00
+
+ Time of computation ->  20240103.020000      in sec:     180000.
+ Boundary data type TPAR processed, time:      180000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.01       0.00       1.00
+     1   137    138       2.01       0.00       1.00
+     1   136    137       2.01       0.00       1.00
+     1   135    136       2.01       0.00       1.00
+     1   134    135       2.01       0.00       1.00
+     1   133    134       2.01       0.00       1.00
+     1   132    133       2.01       0.00       1.00
+     1   131    132       2.01       0.00       1.00
+     1   130    131       2.01       0.00       1.00
+     1   129    130       2.01       1.74       0.13
+
+ Time of computation ->  20240103.030000      in sec:     183600.
+ Boundary data type TPAR processed, time:      183600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.75       0.00       1.00
+     1   137    138       1.75       0.00       1.00
+     1   136    137       1.75       0.00       1.00
+     1   135    136       1.75       0.00       1.00
+     1   134    135       1.75       0.00       1.00
+     1   133    134       1.75       0.00       1.00
+     1   132    133       1.75       0.00       1.00
+     1   131    132       1.75       0.00       1.00
+     1   130    131       1.75       0.00       1.00
+
+ Time of computation ->  20240103.040000      in sec:     187200.
+ Boundary data type TPAR processed, time:      187200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.18       0.00       1.00
+     1   137    138       3.18       0.00       1.00
+     1   136    137       3.18       0.00       1.00
+     1   135    136       3.18       0.00       1.00
+     1   134    135       3.18       0.00       1.00
+     1   133    134       3.18       0.00       1.00
+     1   132    133       3.18       0.00       1.00
+     1   131    132       3.18       0.00       1.00
+     1   130    131       3.18       0.00       1.00
+     1   129    130       3.18       1.74       0.45
+
+ Time of computation ->  20240103.050000      in sec:     190800.
+ Boundary data type TPAR processed, time:      190800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.88       0.00       1.00
+     1   137    138       1.88       0.00       1.00
+     1   136    137       1.88       0.00       1.00
+     1   135    136       1.88       0.00       1.00
+     1   134    135       1.88       0.00       1.00
+     1   133    134       1.88       0.00       1.00
+     1   132    133       1.88       0.00       1.00
+     1   131    132       1.88       0.00       1.00
+     1   130    131       1.88       0.00       1.00
+
+ Time of computation ->  20240103.060000      in sec:     194400.
+ Boundary data type TPAR processed, time:      194400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.09       0.00       1.00
+     1   137    138       1.09       0.00       1.00
+     1   136    137       1.09       0.00       1.00
+     1   135    136       1.09       0.00       1.00
+     1   134    135       1.09       0.00       1.00
+     1   133    134       1.09       0.00       1.00
+     1   132    133       1.09       0.00       1.00
+     1   131    132       1.09       0.00       1.00
+     1   130    131       1.09       0.00       1.00
+
+ Time of computation ->  20240103.070000      in sec:     198000.
+ Boundary data type TPAR processed, time:      198000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.37       0.00       1.00
+     1   137    138       1.37       0.00       1.00
+     1   136    137       1.37       0.00       1.00
+     1   135    136       1.37       0.00       1.00
+     1   134    135       1.37       0.00       1.00
+     1   133    134       1.37       0.00       1.00
+     1   132    133       1.37       0.00       1.00
+     1   131    132       1.37       0.00       1.00
+     1   130    131       1.37       0.00       1.00
+
+ Time of computation ->  20240103.080000      in sec:     201600.
+ Boundary data type TPAR processed, time:      201600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.79       0.00       1.00
+     1   137    138       1.79       0.00       1.00
+     1   136    137       1.79       0.00       1.00
+     1   135    136       1.79       0.00       1.00
+     1   134    135       1.79       0.00       1.00
+     1   133    134       1.79       0.00       1.00
+     1   132    133       1.79       0.00       1.00
+     1   131    132       1.79       0.00       1.00
+     1   130    131       1.79       0.00       1.00
+
+ Time of computation ->  20240103.090000      in sec:     205200.
+ Boundary data type TPAR processed, time:      205200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.06       0.00       1.00
+     1   137    138       2.06       0.00       1.00
+     1   136    137       2.06       0.00       1.00
+     1   135    136       2.06       0.00       1.00
+     1   134    135       2.06       0.00       1.00
+     1   133    134       2.06       0.00       1.00
+     1   132    133       2.06       0.00       1.00
+     1   131    132       2.06       0.00       1.00
+     1   130    131       2.06       0.00       1.00
+     1   129    130       2.06       1.74       0.15
+
+ Time of computation ->  20240103.100000      in sec:     208800.
+ Boundary data type TPAR processed, time:      208800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.21       0.00       1.00
+     1   137    138       2.21       0.00       1.00
+     1   136    137       2.21       0.00       1.00
+     1   135    136       2.21       0.00       1.00
+     1   134    135       2.21       0.00       1.00
+     1   133    134       2.21       0.00       1.00
+     1   132    133       2.21       0.00       1.00
+     1   131    132       2.21       0.00       1.00
+     1   130    131       2.21       0.00       1.00
+     1   129    130       2.21       1.74       0.21
+
+ Time of computation ->  20240103.110000      in sec:     212400.
+ Boundary data type TPAR processed, time:      212400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.30       0.00       1.00
+     1   137    138       2.30       0.00       1.00
+     1   136    137       2.30       0.00       1.00
+     1   135    136       2.30       0.00       1.00
+     1   134    135       2.30       0.00       1.00
+     1   133    134       2.30       0.00       1.00
+     1   132    133       2.30       0.00       1.00
+     1   131    132       2.30       0.00       1.00
+     1   130    131       2.30       0.00       1.00
+     1   129    130       2.30       1.74       0.24
+
+ Time of computation ->  20240103.120000      in sec:     216000.
+ Boundary data type TPAR processed, time:      216000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.37       0.00       1.00
+     1   137    138       2.37       0.00       1.00
+     1   136    137       2.37       0.00       1.00
+     1   135    136       2.37       0.00       1.00
+     1   134    135       2.37       0.00       1.00
+     1   133    134       2.37       0.00       1.00
+     1   132    133       2.37       0.00       1.00
+     1   131    132       2.37       0.00       1.00
+     1   130    131       2.37       0.00       1.00
+     1   129    130       2.37       1.74       0.26
+
+ Time of computation ->  20240103.130000      in sec:     219600.
+ Boundary data type TPAR processed, time:      219600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.45       0.00       1.00
+     1   137    138       2.45       0.00       1.00
+     1   136    137       2.45       0.00       1.00
+     1   135    136       2.45       0.00       1.00
+     1   134    135       2.45       0.00       1.00
+     1   133    134       2.45       0.00       1.00
+     1   132    133       2.45       0.00       1.00
+     1   131    132       2.45       0.00       1.00
+     1   130    131       2.45       0.00       1.00
+     1   129    130       2.45       1.74       0.29
+
+ Time of computation ->  20240103.140000      in sec:     223200.
+ Boundary data type TPAR processed, time:      223200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.62       0.00       1.00
+     1   137    138       2.62       0.00       1.00
+     1   136    137       2.62       0.00       1.00
+     1   135    136       2.62       0.00       1.00
+     1   134    135       2.62       0.00       1.00
+     1   133    134       2.62       0.00       1.00
+     1   132    133       2.62       0.00       1.00
+     1   131    132       2.62       0.00       1.00
+     1   130    131       2.62       0.00       1.00
+     1   129    130       2.62       1.74       0.33
+
+ Time of computation ->  20240103.150000      in sec:     226800.
+ Boundary data type TPAR processed, time:      226800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.96       0.00       1.00
+     1   137    138       2.96       0.00       1.00
+     1   136    137       2.96       0.00       1.00
+     1   135    136       2.96       0.00       1.00
+     1   134    135       2.96       0.00       1.00
+     1   133    134       2.96       0.00       1.00
+     1   132    133       2.96       0.00       1.00
+     1   131    132       2.96       0.00       1.00
+     1   130    131       2.96       0.00       1.00
+     1   129    130       2.96       1.74       0.41
+
+ Time of computation ->  20240103.160000      in sec:     230400.
+ Boundary data type TPAR processed, time:      230400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.41       0.00       1.00
+     1   137    138       3.41       0.00       1.00
+     1   136    137       3.41       0.00       1.00
+     1   135    136       3.41       0.00       1.00
+     1   134    135       3.41       0.00       1.00
+     1   133    134       3.41       0.00       1.00
+     1   132    133       3.41       0.00       1.00
+     1   131    132       3.41       0.00       1.00
+     1   130    131       3.41       0.00       1.00
+     1   129    130       3.41       1.74       0.49
+
+ Time of computation ->  20240103.170000      in sec:     234000.
+ Boundary data type TPAR processed, time:      234000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.89       0.00       1.00
+     1   137    138       3.89       0.00       1.00
+     1   136    137       3.89       0.00       1.00
+     1   135    136       3.89       0.00       1.00
+     1   134    135       3.89       0.00       1.00
+     1   133    134       3.89       0.00       1.00
+     1   132    133       3.89       0.00       1.00
+     1   131    132       3.89       0.00       1.00
+     1   130    131       3.89       0.00       1.00
+     1   129    130       3.89       1.74       0.55
+
+ Time of computation ->  20240103.180000      in sec:     237600.
+ Boundary data type TPAR processed, time:      237600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       4.26       0.00       1.00
+     1   137    138       4.26       0.00       1.00
+     1   136    137       4.26       0.00       1.00
+     1   135    136       4.26       0.00       1.00
+     1   134    135       4.26       0.00       1.00
+     1   133    134       4.26       0.00       1.00
+     1   132    133       4.26       0.00       1.00
+     1   131    132       4.26       0.00       1.00
+     1   130    131       4.26       0.00       1.00
+     1   129    130       4.26       1.74       0.59
+
+ Time of computation ->  20240103.190000      in sec:     241200.
+ Boundary data type TPAR processed, time:      241200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       4.38       0.00       1.00
+     1   137    138       4.38       0.00       1.00
+     1   136    137       4.38       0.00       1.00
+     1   135    136       4.38       0.00       1.00
+     1   134    135       4.38       0.00       1.00
+     1   133    134       4.38       0.00       1.00
+     1   132    133       4.38       0.00       1.00
+     1   131    132       4.38       0.00       1.00
+     1   130    131       4.38       0.00       1.00
+     1   129    130       4.38       1.74       0.60
+
+ Time of computation ->  20240103.200000      in sec:     244800.
+ Boundary data type TPAR processed, time:      244800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       4.01       0.00       1.00
+     1   137    138       4.01       0.00       1.00
+     1   136    137       4.01       0.00       1.00
+     1   135    136       4.01       0.00       1.00
+     1   134    135       4.01       0.00       1.00
+     1   133    134       4.01       0.00       1.00
+     1   132    133       4.01       0.00       1.00
+     1   131    132       4.01       0.00       1.00
+     1   130    131       4.01       0.00       1.00
+     1   129    130       4.01       1.74       0.57
+
+ Time of computation ->  20240103.210000      in sec:     248400.
+ Boundary data type TPAR processed, time:      248400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.99       0.00       1.00
+     1   137    138       2.99       0.00       1.00
+     1   136    137       2.99       0.00       1.00
+     1   135    136       2.99       0.00       1.00
+     1   134    135       2.99       0.00       1.00
+     1   133    134       2.99       0.00       1.00
+     1   132    133       2.99       0.00       1.00
+     1   131    132       2.99       0.00       1.00
+     1   130    131       2.99       0.00       1.00
+     1   129    130       2.99       1.74       0.42
+
+ Time of computation ->  20240103.220000      in sec:     252000.
+ Boundary data type TPAR processed, time:      252000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.06       0.00       1.00
+     1   137    138       2.06       0.00       1.00
+     1   136    137       2.06       0.00       1.00
+     1   135    136       2.06       0.00       1.00
+     1   134    135       2.06       0.00       1.00
+     1   133    134       2.06       0.00       1.00
+     1   132    133       2.06       0.00       1.00
+     1   131    132       2.06       0.00       1.00
+     1   130    131       2.06       0.00       1.00
+     1   129    130       2.06       1.74       0.15
+
+ Time of computation ->  20240103.230000      in sec:     255600.
+ Boundary data type TPAR processed, time:      255600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.41       0.00       1.00
+     1   137    138       1.41       0.00       1.00
+     1   136    137       1.41       0.00       1.00
+     1   135    136       1.41       0.00       1.00
+     1   134    135       1.41       0.00       1.00
+     1   133    134       1.41       0.00       1.00
+     1   132    133       1.41       0.00       1.00
+     1   131    132       1.41       0.00       1.00
+     1   130    131       1.41       0.00       1.00
+
+ Time of computation ->  20240104.000000      in sec:     259200.
+ Boundary data type TPAR processed, time:      259200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.32       0.00       1.00
+     1   137    138       1.32       0.00       1.00
+     1   136    137       1.32       0.00       1.00
+     1   135    136       1.32       0.00       1.00
+     1   134    135       1.32       0.00       1.00
+     1   133    134       1.32       0.00       1.00
+     1   132    133       1.32       0.00       1.00
+     1   131    132       1.32       0.00       1.00
+     1   130    131       1.32       0.00       1.00
+
+ Time of computation ->  20240104.010000      in sec:     262800.
+ Boundary data type TPAR processed, time:      262800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.96       0.00       1.00
+     1   137    138       1.96       0.00       1.00
+     1   136    137       1.96       0.00       1.00
+     1   135    136       1.96       0.00       1.00
+     1   134    135       1.96       0.00       1.00
+     1   133    134       1.96       0.00       1.00
+     1   132    133       1.96       0.00       1.00
+     1   131    132       1.96       0.00       1.00
+     1   130    131       1.96       0.00       1.00
+     1   129    130       1.96       1.74       0.11
+
+ Time of computation ->  20240104.020000      in sec:     266400.
+ Boundary data type TPAR processed, time:      266400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.95       0.00       1.00
+     1   137    138       2.95       0.00       1.00
+     1   136    137       2.95       0.00       1.00
+     1   135    136       2.95       0.00       1.00
+     1   134    135       2.95       0.00       1.00
+     1   133    134       2.95       0.00       1.00
+     1   132    133       2.95       0.00       1.00
+     1   131    132       2.95       0.00       1.00
+     1   130    131       2.95       0.00       1.00
+     1   129    130       2.95       1.74       0.41
+
+ Time of computation ->  20240104.030000      in sec:     270000.
+ Boundary data type TPAR processed, time:      270000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.77       0.00       1.00
+     1   137    138       3.77       0.00       1.00
+     1   136    137       3.77       0.00       1.00
+     1   135    136       3.77       0.00       1.00
+     1   134    135       3.77       0.00       1.00
+     1   133    134       3.77       0.00       1.00
+     1   132    133       3.77       0.00       1.00
+     1   131    132       3.77       0.00       1.00
+     1   130    131       3.77       0.00       1.00
+     1   129    130       3.77       1.74       0.54
+
+ Time of computation ->  20240104.040000      in sec:     273600.
+ Boundary data type TPAR processed, time:      273600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       4.06       0.00       1.00
+     1   137    138       4.06       0.00       1.00
+     1   136    137       4.06       0.00       1.00
+     1   135    136       4.06       0.00       1.00
+     1   134    135       4.06       0.00       1.00
+     1   133    134       4.06       0.00       1.00
+     1   132    133       4.06       0.00       1.00
+     1   131    132       4.06       0.00       1.00
+     1   130    131       4.06       0.00       1.00
+     1   129    130       4.06       1.74       0.57
+
+ Time of computation ->  20240104.050000      in sec:     277200.
+ Boundary data type TPAR processed, time:      277200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       4.10       0.00       1.00
+     1   137    138       4.10       0.00       1.00
+     1   136    137       4.10       0.00       1.00
+     1   135    136       4.10       0.00       1.00
+     1   134    135       4.10       0.00       1.00
+     1   133    134       4.10       0.00       1.00
+     1   132    133       4.10       0.00       1.00
+     1   131    132       4.10       0.00       1.00
+     1   130    131       4.10       0.00       1.00
+     1   129    130       4.10       1.74       0.57
+
+ Time of computation ->  20240104.060000      in sec:     280800.
+ Boundary data type TPAR processed, time:      280800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       4.03       0.00       1.00
+     1   137    138       4.03       0.00       1.00
+     1   136    137       4.03       0.00       1.00
+     1   135    136       4.03       0.00       1.00
+     1   134    135       4.03       0.00       1.00
+     1   133    134       4.03       0.00       1.00
+     1   132    133       4.03       0.00       1.00
+     1   131    132       4.03       0.00       1.00
+     1   130    131       4.03       0.00       1.00
+     1   129    130       4.03       1.74       0.57
+
+ Time of computation ->  20240104.070000      in sec:     284400.
+ Boundary data type TPAR processed, time:      284400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.74       0.00       1.00
+     1   137    138       3.74       0.00       1.00
+     1   136    137       3.74       0.00       1.00
+     1   135    136       3.74       0.00       1.00
+     1   134    135       3.74       0.00       1.00
+     1   133    134       3.74       0.00       1.00
+     1   132    133       3.74       0.00       1.00
+     1   131    132       3.74       0.00       1.00
+     1   130    131       3.74       0.00       1.00
+     1   129    130       3.74       1.74       0.53
+
+ Time of computation ->  20240104.080000      in sec:     288000.
+ Boundary data type TPAR processed, time:      288000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.34       0.00       1.00
+     1   137    138       3.34       0.00       1.00
+     1   136    137       3.34       0.00       1.00
+     1   135    136       3.34       0.00       1.00
+     1   134    135       3.34       0.00       1.00
+     1   133    134       3.34       0.00       1.00
+     1   132    133       3.34       0.00       1.00
+     1   131    132       3.34       0.00       1.00
+     1   130    131       3.34       0.00       1.00
+     1   129    130       3.34       1.74       0.48
+
+ Time of computation ->  20240104.090000      in sec:     291600.
+ Boundary data type TPAR processed, time:      291600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.85       0.00       1.00
+     1   137    138       2.85       0.00       1.00
+     1   136    137       2.85       0.00       1.00
+     1   135    136       2.85       0.00       1.00
+     1   134    135       2.85       0.00       1.00
+     1   133    134       2.85       0.00       1.00
+     1   132    133       2.85       0.00       1.00
+     1   131    132       2.85       0.00       1.00
+     1   130    131       2.85       0.00       1.00
+     1   129    130       2.85       1.74       0.39
+
+ Time of computation ->  20240104.100000      in sec:     295200.
+ Boundary data type TPAR processed, time:      295200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.64       0.00       1.00
+     1   137    138       2.64       0.00       1.00
+     1   136    137       2.64       0.00       1.00
+     1   135    136       2.64       0.00       1.00
+     1   134    135       2.64       0.00       1.00
+     1   133    134       2.64       0.00       1.00
+     1   132    133       2.64       0.00       1.00
+     1   131    132       2.64       0.00       1.00
+     1   130    131       2.64       0.00       1.00
+     1   129    130       2.64       1.74       0.34
+
+ Time of computation ->  20240104.110000      in sec:     298800.
+ Boundary data type TPAR processed, time:      298800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.57       0.00       1.00
+     1   137    138       2.57       0.00       1.00
+     1   136    137       2.57       0.00       1.00
+     1   135    136       2.57       0.00       1.00
+     1   134    135       2.57       0.00       1.00
+     1   133    134       2.57       0.00       1.00
+     1   132    133       2.57       0.00       1.00
+     1   131    132       2.57       0.00       1.00
+     1   130    131       2.57       0.00       1.00
+     1   129    130       2.57       1.74       0.32
+
+ Time of computation ->  20240104.120000      in sec:     302400.
+ Boundary data type TPAR processed, time:      302400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.49       0.00       1.00
+     1   137    138       2.49       0.00       1.00
+     1   136    137       2.49       0.00       1.00
+     1   135    136       2.49       0.00       1.00
+     1   134    135       2.49       0.00       1.00
+     1   133    134       2.49       0.00       1.00
+     1   132    133       2.49       0.00       1.00
+     1   131    132       2.49       0.00       1.00
+     1   130    131       2.49       0.00       1.00
+     1   129    130       2.49       1.74       0.30
+
+ Time of computation ->  20240104.130000      in sec:     306000.
+ Boundary data type TPAR processed, time:      306000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.43       0.00       1.00
+     1   137    138       2.43       0.00       1.00
+     1   136    137       2.43       0.00       1.00
+     1   135    136       2.43       0.00       1.00
+     1   134    135       2.43       0.00       1.00
+     1   133    134       2.43       0.00       1.00
+     1   132    133       2.43       0.00       1.00
+     1   131    132       2.43       0.00       1.00
+     1   130    131       2.43       0.00       1.00
+     1   129    130       2.43       1.74       0.28
+
+ Time of computation ->  20240104.140000      in sec:     309600.
+ Boundary data type TPAR processed, time:      309600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.44       0.00       1.00
+     1   137    138       2.44       0.00       1.00
+     1   136    137       2.44       0.00       1.00
+     1   135    136       2.44       0.00       1.00
+     1   134    135       2.44       0.00       1.00
+     1   133    134       2.44       0.00       1.00
+     1   132    133       2.44       0.00       1.00
+     1   131    132       2.44       0.00       1.00
+     1   130    131       2.44       0.00       1.00
+     1   129    130       2.44       1.74       0.29
+
+ Time of computation ->  20240104.150000      in sec:     313200.
+ Boundary data type TPAR processed, time:      313200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.48       0.00       1.00
+     1   137    138       2.48       0.00       1.00
+     1   136    137       2.48       0.00       1.00
+     1   135    136       2.48       0.00       1.00
+     1   134    135       2.48       0.00       1.00
+     1   133    134       2.48       0.00       1.00
+     1   132    133       2.48       0.00       1.00
+     1   131    132       2.48       0.00       1.00
+     1   130    131       2.48       0.00       1.00
+     1   129    130       2.48       1.74       0.30
+
+ Time of computation ->  20240104.160000      in sec:     316800.
+ Boundary data type TPAR processed, time:      316800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.44       0.00       1.00
+     1   137    138       2.44       0.00       1.00
+     1   136    137       2.44       0.00       1.00
+     1   135    136       2.44       0.00       1.00
+     1   134    135       2.44       0.00       1.00
+     1   133    134       2.44       0.00       1.00
+     1   132    133       2.44       0.00       1.00
+     1   131    132       2.44       0.00       1.00
+     1   130    131       2.44       0.00       1.00
+     1   129    130       2.44       1.74       0.29
+
+ Time of computation ->  20240104.170000      in sec:     320400.
+ Boundary data type TPAR processed, time:      320400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.25       0.00       1.00
+     1   137    138       2.25       0.00       1.00
+     1   136    137       2.25       0.00       1.00
+     1   135    136       2.25       0.00       1.00
+     1   134    135       2.25       0.00       1.00
+     1   133    134       2.25       0.00       1.00
+     1   132    133       2.25       0.00       1.00
+     1   131    132       2.25       0.00       1.00
+     1   130    131       2.25       0.00       1.00
+     1   129    130       2.25       1.74       0.23
+
+ Time of computation ->  20240104.180000      in sec:     324000.
+ Boundary data type TPAR processed, time:      324000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.10       0.00       1.00
+     1   137    138       2.10       0.00       1.00
+     1   136    137       2.10       0.00       1.00
+     1   135    136       2.10       0.00       1.00
+     1   134    135       2.10       0.00       1.00
+     1   133    134       2.10       0.00       1.00
+     1   132    133       2.10       0.00       1.00
+     1   131    132       2.10       0.00       1.00
+     1   130    131       2.10       0.00       1.00
+     1   129    130       2.10       1.74       0.17
+
+ Time of computation ->  20240104.190000      in sec:     327600.
+ Boundary data type TPAR processed, time:      327600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.00       0.00       1.00
+     1   137    138       2.00       0.00       1.00
+     1   136    137       2.00       0.00       1.00
+     1   135    136       2.00       0.00       1.00
+     1   134    135       2.00       0.00       1.00
+     1   133    134       2.00       0.00       1.00
+     1   132    133       2.00       0.00       1.00
+     1   131    132       2.00       0.00       1.00
+     1   130    131       2.00       0.00       1.00
+     1   129    130       2.00       1.74       0.13
+
+ Time of computation ->  20240104.200000      in sec:     331200.
+ Boundary data type TPAR processed, time:      331200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.90       0.00       1.00
+     1   137    138       1.90       0.00       1.00
+     1   136    137       1.90       0.00       1.00
+     1   135    136       1.90       0.00       1.00
+     1   134    135       1.90       0.00       1.00
+     1   133    134       1.90       0.00       1.00
+     1   132    133       1.90       0.00       1.00
+     1   131    132       1.90       0.00       1.00
+     1   130    131       1.90       0.00       1.00
+
+ Time of computation ->  20240104.210000      in sec:     334800.
+ Boundary data type TPAR processed, time:      334800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.74       0.00       1.00
+     1   137    138       1.74       0.00       1.00
+     1   136    137       1.74       0.00       1.00
+     1   135    136       1.74       0.00       1.00
+     1   134    135       1.74       0.00       1.00
+     1   133    134       1.74       0.00       1.00
+     1   132    133       1.74       0.00       1.00
+     1   131    132       1.74       0.00       1.00
+     1   130    131       1.74       0.00       1.00
+
+ Time of computation ->  20240104.220000      in sec:     338400.
+ Boundary data type TPAR processed, time:      338400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.70       0.00       1.00
+     1   137    138       1.70       0.00       1.00
+     1   136    137       1.70       0.00       1.00
+     1   135    136       1.70       0.00       1.00
+     1   134    135       1.70       0.00       1.00
+     1   133    134       1.70       0.00       1.00
+     1   132    133       1.70       0.00       1.00
+     1   131    132       1.70       0.00       1.00
+     1   130    131       1.70       0.00       1.00
+
+ Time of computation ->  20240104.230000      in sec:     342000.
+ Boundary data type TPAR processed, time:      342000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.67       0.00       1.00
+     1   137    138       1.67       0.00       1.00
+     1   136    137       1.67       0.00       1.00
+     1   135    136       1.67       0.00       1.00
+     1   134    135       1.67       0.00       1.00
+     1   133    134       1.67       0.00       1.00
+     1   132    133       1.67       0.00       1.00
+     1   131    132       1.67       0.00       1.00
+     1   130    131       1.67       0.00       1.00
+
+ Time of computation ->  20240105.000000      in sec:     345600.
+ Boundary data type TPAR processed, time:      345600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.64       0.00       1.00
+     1   137    138       1.64       0.00       1.00
+     1   136    137       1.64       0.00       1.00
+     1   135    136       1.64       0.00       1.00
+     1   134    135       1.64       0.00       1.00
+     1   133    134       1.64       0.00       1.00
+     1   132    133       1.64       0.00       1.00
+     1   131    132       1.64       0.00       1.00
+     1   130    131       1.64       0.00       1.00
+
+ Time of computation ->  20240105.010000      in sec:     349200.
+ Boundary data type TPAR processed, time:      349200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.62       0.00       1.00
+     1   137    138       1.62       0.00       1.00
+     1   136    137       1.62       0.00       1.00
+     1   135    136       1.62       0.00       1.00
+     1   134    135       1.62       0.00       1.00
+     1   133    134       1.62       0.00       1.00
+     1   132    133       1.62       0.00       1.00
+     1   131    132       1.62       0.00       1.00
+     1   130    131       1.62       0.00       1.00
+
+ Time of computation ->  20240105.020000      in sec:     352800.
+ Boundary data type TPAR processed, time:      352800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.59       0.00       1.00
+     1   137    138       1.59       0.00       1.00
+     1   136    137       1.59       0.00       1.00
+     1   135    136       1.59       0.00       1.00
+     1   134    135       1.59       0.00       1.00
+     1   133    134       1.59       0.00       1.00
+     1   132    133       1.59       0.00       1.00
+     1   131    132       1.59       0.00       1.00
+     1   130    131       1.59       0.00       1.00
+
+ Time of computation ->  20240105.030000      in sec:     356400.
+ Boundary data type TPAR processed, time:      356400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.55       0.00       1.00
+     1   137    138       1.55       0.00       1.00
+     1   136    137       1.55       0.00       1.00
+     1   135    136       1.55       0.00       1.00
+     1   134    135       1.55       0.00       1.00
+     1   133    134       1.55       0.00       1.00
+     1   132    133       1.55       0.00       1.00
+     1   131    132       1.55       0.00       1.00
+     1   130    131       1.55       0.00       1.00
+
+ Time of computation ->  20240105.040000      in sec:     360000.
+ Boundary data type TPAR processed, time:      360000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.51       0.00       1.00
+     1   137    138       1.51       0.00       1.00
+     1   136    137       1.51       0.00       1.00
+     1   135    136       1.51       0.00       1.00
+     1   134    135       1.51       0.00       1.00
+     1   133    134       1.51       0.00       1.00
+     1   132    133       1.51       0.00       1.00
+     1   131    132       1.51       0.00       1.00
+     1   130    131       1.51       0.00       1.00
+
+ Time of computation ->  20240105.050000      in sec:     363600.
+ Boundary data type TPAR processed, time:      363600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.47       0.00       1.00
+     1   137    138       1.47       0.00       1.00
+     1   136    137       1.47       0.00       1.00
+     1   135    136       1.47       0.00       1.00
+     1   134    135       1.47       0.00       1.00
+     1   133    134       1.47       0.00       1.00
+     1   132    133       1.47       0.00       1.00
+     1   131    132       1.47       0.00       1.00
+     1   130    131       1.47       0.00       1.00
+
+ Time of computation ->  20240105.060000      in sec:     367200.
+ Boundary data type TPAR processed, time:      367200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.39       0.00       1.00
+     1   137    138       1.39       0.00       1.00
+     1   136    137       1.39       0.00       1.00
+     1   135    136       1.39       0.00       1.00
+     1   134    135       1.39       0.00       1.00
+     1   133    134       1.39       0.00       1.00
+     1   132    133       1.39       0.00       1.00
+     1   131    132       1.39       0.00       1.00
+     1   130    131       1.39       0.00       1.00
+
+ Time of computation ->  20240105.070000      in sec:     370800.
+ Boundary data type TPAR processed, time:      370800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.30       0.00       1.00
+     1   137    138       1.30       0.00       1.00
+     1   136    137       1.30       0.00       1.00
+     1   135    136       1.30       0.00       1.00
+     1   134    135       1.30       0.00       1.00
+     1   133    134       1.30       0.00       1.00
+     1   132    133       1.30       0.00       1.00
+     1   131    132       1.30       0.00       1.00
+     1   130    131       1.30       0.00       1.00
+
+ Time of computation ->  20240105.080000      in sec:     374400.
+ Boundary data type TPAR processed, time:      374400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.16       0.00       1.00
+     1   137    138       1.16       0.00       1.00
+     1   136    137       1.16       0.00       1.00
+     1   135    136       1.16       0.00       1.00
+     1   134    135       1.16       0.00       1.00
+     1   133    134       1.16       0.00       1.00
+     1   132    133       1.16       0.00       1.00
+     1   131    132       1.16       0.00       1.00
+     1   130    131       1.16       0.00       1.00
+
+ Time of computation ->  20240105.090000      in sec:     378000.
+ Boundary data type TPAR processed, time:      378000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       0.99       0.00       1.00
+     1   137    138       0.99       0.00       1.00
+     1   136    137       0.99       0.00       1.00
+     1   135    136       0.99       0.00       1.00
+     1   134    135       0.99       0.00       1.00
+     1   133    134       0.99       0.00       1.00
+     1   132    133       0.99       0.00       1.00
+     1   131    132       0.99       0.00       1.00
+     1   130    131       0.99       0.00       1.00
+
+ Time of computation ->  20240105.100000      in sec:     381600.
+ Boundary data type TPAR processed, time:      381600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       0.84       0.00       1.00
+     1   137    138       0.84       0.00       1.00
+     1   136    137       0.84       0.00       1.00
+     1   135    136       0.84       0.00       1.00
+     1   134    135       0.84       0.00       1.00
+     1   133    134       0.84       0.00       1.00
+     1   132    133       0.84       0.00       1.00
+     1   131    132       0.84       0.00       1.00
+     1   130    131       0.84       0.00       1.00
+
+ Time of computation ->  20240105.110000      in sec:     385200.
+ Boundary data type TPAR processed, time:      385200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       0.76       0.00       1.00
+     1   137    138       0.76       0.00       1.00
+     1   136    137       0.76       0.00       1.00
+     1   135    136       0.76       0.00       1.00
+     1   134    135       0.76       0.00       1.00
+     1   133    134       0.76       0.00       1.00
+     1   132    133       0.76       0.00       1.00
+     1   131    132       0.76       0.00       1.00
+     1   130    131       0.76       0.00       1.00
+
+ Time of computation ->  20240105.120000      in sec:     388800.
+ Boundary data type TPAR processed, time:      388800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       0.77       0.00       1.00
+     1   137    138       0.77       0.00       1.00
+     1   136    137       0.77       0.00       1.00
+     1   135    136       0.77       0.00       1.00
+     1   134    135       0.77       0.00       1.00
+     1   133    134       0.77       0.00       1.00
+     1   132    133       0.77       0.00       1.00
+     1   131    132       0.77       0.00       1.00
+     1   130    131       0.77       0.00       1.00
+
+ Time of computation ->  20240105.130000      in sec:     392400.
+ Boundary data type TPAR processed, time:      392400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       0.88       0.00       1.00
+     1   137    138       0.88       0.00       1.00
+     1   136    137       0.88       0.00       1.00
+     1   135    136       0.88       0.00       1.00
+     1   134    135       0.88       0.00       1.00
+     1   133    134       0.88       0.00       1.00
+     1   132    133       0.88       0.00       1.00
+     1   131    132       0.88       0.00       1.00
+     1   130    131       0.88       0.00       1.00
+
+ Time of computation ->  20240105.140000      in sec:     396000.
+ Boundary data type TPAR processed, time:      396000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.07       0.00       1.00
+     1   137    138       1.07       0.00       1.00
+     1   136    137       1.07       0.00       1.00
+     1   135    136       1.07       0.00       1.00
+     1   134    135       1.07       0.00       1.00
+     1   133    134       1.07       0.00       1.00
+     1   132    133       1.07       0.00       1.00
+     1   131    132       1.07       0.00       1.00
+     1   130    131       1.07       0.00       1.00
+
+ Time of computation ->  20240105.150000      in sec:     399600.
+ Boundary data type TPAR processed, time:      399600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.38       0.00       1.00
+     1   137    138       1.38       0.00       1.00
+     1   136    137       1.38       0.00       1.00
+     1   135    136       1.38       0.00       1.00
+     1   134    135       1.38       0.00       1.00
+     1   133    134       1.38       0.00       1.00
+     1   132    133       1.38       0.00       1.00
+     1   131    132       1.38       0.00       1.00
+     1   130    131       1.38       0.00       1.00
+
+ Time of computation ->  20240105.160000      in sec:     403200.
+ Boundary data type TPAR processed, time:      403200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.73       0.00       1.00
+     1   137    138       1.73       0.00       1.00
+     1   136    137       1.73       0.00       1.00
+     1   135    136       1.73       0.00       1.00
+     1   134    135       1.73       0.00       1.00
+     1   133    134       1.73       0.00       1.00
+     1   132    133       1.73       0.00       1.00
+     1   131    132       1.73       0.00       1.00
+     1   130    131       1.73       0.00       1.00
+
+ Time of computation ->  20240105.170000      in sec:     406800.
+ Boundary data type TPAR processed, time:      406800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.13       0.00       1.00
+     1   137    138       2.13       0.00       1.00
+     1   136    137       2.13       0.00       1.00
+     1   135    136       2.13       0.00       1.00
+     1   134    135       2.13       0.00       1.00
+     1   133    134       2.13       0.00       1.00
+     1   132    133       2.13       0.00       1.00
+     1   131    132       2.13       0.00       1.00
+     1   130    131       2.13       0.00       1.00
+     1   129    130       2.13       1.74       0.18
+
+ Time of computation ->  20240105.180000      in sec:     410400.
+ Boundary data type TPAR processed, time:      410400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.43       0.00       1.00
+     1   137    138       2.43       0.00       1.00
+     1   136    137       2.43       0.00       1.00
+     1   135    136       2.43       0.00       1.00
+     1   134    135       2.43       0.00       1.00
+     1   133    134       2.43       0.00       1.00
+     1   132    133       2.43       0.00       1.00
+     1   131    132       2.43       0.00       1.00
+     1   130    131       2.43       0.00       1.00
+     1   129    130       2.43       1.74       0.28
+
+ Time of computation ->  20240105.190000      in sec:     414000.
+ Boundary data type TPAR processed, time:      414000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.66       0.00       1.00
+     1   137    138       2.66       0.00       1.00
+     1   136    137       2.66       0.00       1.00
+     1   135    136       2.66       0.00       1.00
+     1   134    135       2.66       0.00       1.00
+     1   133    134       2.66       0.00       1.00
+     1   132    133       2.66       0.00       1.00
+     1   131    132       2.66       0.00       1.00
+     1   130    131       2.66       0.00       1.00
+     1   129    130       2.66       1.74       0.34
+
+ Time of computation ->  20240105.200000      in sec:     417600.
+ Boundary data type TPAR processed, time:      417600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.87       0.00       1.00
+     1   137    138       2.87       0.00       1.00
+     1   136    137       2.87       0.00       1.00
+     1   135    136       2.87       0.00       1.00
+     1   134    135       2.87       0.00       1.00
+     1   133    134       2.87       0.00       1.00
+     1   132    133       2.87       0.00       1.00
+     1   131    132       2.87       0.00       1.00
+     1   130    131       2.87       0.00       1.00
+     1   129    130       2.87       1.74       0.39
+
+ Time of computation ->  20240105.210000      in sec:     421200.
+ Boundary data type TPAR processed, time:      421200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.06       0.00       1.00
+     1   137    138       3.06       0.00       1.00
+     1   136    137       3.06       0.00       1.00
+     1   135    136       3.06       0.00       1.00
+     1   134    135       3.06       0.00       1.00
+     1   133    134       3.06       0.00       1.00
+     1   132    133       3.06       0.00       1.00
+     1   131    132       3.06       0.00       1.00
+     1   130    131       3.06       0.00       1.00
+     1   129    130       3.06       1.74       0.43
+
+ Time of computation ->  20240105.220000      in sec:     424800.
+ Boundary data type TPAR processed, time:      424800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.19       0.00       1.00
+     1   137    138       3.19       0.00       1.00
+     1   136    137       3.19       0.00       1.00
+     1   135    136       3.19       0.00       1.00
+     1   134    135       3.19       0.00       1.00
+     1   133    134       3.19       0.00       1.00
+     1   132    133       3.19       0.00       1.00
+     1   131    132       3.19       0.00       1.00
+     1   130    131       3.19       0.00       1.00
+     1   129    130       3.19       1.74       0.45
+
+ Time of computation ->  20240105.230000      in sec:     428400.
+ Boundary data type TPAR processed, time:      428400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.31       0.00       1.00
+     1   137    138       3.31       0.00       1.00
+     1   136    137       3.31       0.00       1.00
+     1   135    136       3.31       0.00       1.00
+     1   134    135       3.31       0.00       1.00
+     1   133    134       3.31       0.00       1.00
+     1   132    133       3.31       0.00       1.00
+     1   131    132       3.31       0.00       1.00
+     1   130    131       3.31       0.00       1.00
+     1   129    130       3.31       1.74       0.47
+
+ Time of computation ->  20240106.000000      in sec:     432000.
+ Boundary data type TPAR processed, time:      432000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.41       0.00       1.00
+     1   137    138       3.41       0.00       1.00
+     1   136    137       3.41       0.00       1.00
+     1   135    136       3.41       0.00       1.00
+     1   134    135       3.41       0.00       1.00
+     1   133    134       3.41       0.00       1.00
+     1   132    133       3.41       0.00       1.00
+     1   131    132       3.41       0.00       1.00
+     1   130    131       3.41       0.00       1.00
+     1   129    130       3.41       1.74       0.49
+
+ Time of computation ->  20240106.010000      in sec:     435600.
+ Boundary data type TPAR processed, time:      435600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.49       0.00       1.00
+     1   137    138       3.49       0.00       1.00
+     1   136    137       3.49       0.00       1.00
+     1   135    136       3.49       0.00       1.00
+     1   134    135       3.49       0.00       1.00
+     1   133    134       3.49       0.00       1.00
+     1   132    133       3.49       0.00       1.00
+     1   131    132       3.49       0.00       1.00
+     1   130    131       3.49       0.00       1.00
+     1   129    130       3.49       1.74       0.50
+
+ Time of computation ->  20240106.020000      in sec:     439200.
+ Boundary data type TPAR processed, time:      439200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.55       0.00       1.00
+     1   137    138       3.55       0.00       1.00
+     1   136    137       3.55       0.00       1.00
+     1   135    136       3.55       0.00       1.00
+     1   134    135       3.55       0.00       1.00
+     1   133    134       3.55       0.00       1.00
+     1   132    133       3.55       0.00       1.00
+     1   131    132       3.55       0.00       1.00
+     1   130    131       3.55       0.00       1.00
+     1   129    130       3.55       1.74       0.51
+
+ Time of computation ->  20240106.030000      in sec:     442800.
+ Boundary data type TPAR processed, time:      442800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.58       0.00       1.00
+     1   137    138       3.58       0.00       1.00
+     1   136    137       3.58       0.00       1.00
+     1   135    136       3.58       0.00       1.00
+     1   134    135       3.58       0.00       1.00
+     1   133    134       3.58       0.00       1.00
+     1   132    133       3.58       0.00       1.00
+     1   131    132       3.58       0.00       1.00
+     1   130    131       3.58       0.00       1.00
+     1   129    130       3.58       1.74       0.51
+
+ Time of computation ->  20240106.040000      in sec:     446400.
+ Boundary data type TPAR processed, time:      446400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.61       0.00       1.00
+     1   137    138       3.61       0.00       1.00
+     1   136    137       3.61       0.00       1.00
+     1   135    136       3.61       0.00       1.00
+     1   134    135       3.61       0.00       1.00
+     1   133    134       3.61       0.00       1.00
+     1   132    133       3.61       0.00       1.00
+     1   131    132       3.61       0.00       1.00
+     1   130    131       3.61       0.00       1.00
+     1   129    130       3.61       1.74       0.52
+
+ Time of computation ->  20240106.050000      in sec:     450000.
+ Boundary data type TPAR processed, time:      450000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.62       0.00       1.00
+     1   137    138       3.62       0.00       1.00
+     1   136    137       3.62       0.00       1.00
+     1   135    136       3.62       0.00       1.00
+     1   134    135       3.62       0.00       1.00
+     1   133    134       3.62       0.00       1.00
+     1   132    133       3.62       0.00       1.00
+     1   131    132       3.62       0.00       1.00
+     1   130    131       3.62       0.00       1.00
+     1   129    130       3.62       1.74       0.52
+
+ Time of computation ->  20240106.060000      in sec:     453600.
+ Boundary data type TPAR processed, time:      453600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.61       0.00       1.00
+     1   137    138       3.61       0.00       1.00
+     1   136    137       3.61       0.00       1.00
+     1   135    136       3.61       0.00       1.00
+     1   134    135       3.61       0.00       1.00
+     1   133    134       3.61       0.00       1.00
+     1   132    133       3.61       0.00       1.00
+     1   131    132       3.61       0.00       1.00
+     1   130    131       3.61       0.00       1.00
+     1   129    130       3.61       1.74       0.52
+
+ Time of computation ->  20240106.070000      in sec:     457200.
+ Boundary data type TPAR processed, time:      457200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.60       0.00       1.00
+     1   137    138       3.60       0.00       1.00
+     1   136    137       3.60       0.00       1.00
+     1   135    136       3.60       0.00       1.00
+     1   134    135       3.60       0.00       1.00
+     1   133    134       3.60       0.00       1.00
+     1   132    133       3.60       0.00       1.00
+     1   131    132       3.60       0.00       1.00
+     1   130    131       3.60       0.00       1.00
+     1   129    130       3.60       1.74       0.52
+
+ Time of computation ->  20240106.080000      in sec:     460800.
+ Boundary data type TPAR processed, time:      460800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.60       0.00       1.00
+     1   137    138       3.60       0.00       1.00
+     1   136    137       3.60       0.00       1.00
+     1   135    136       3.60       0.00       1.00
+     1   134    135       3.60       0.00       1.00
+     1   133    134       3.60       0.00       1.00
+     1   132    133       3.60       0.00       1.00
+     1   131    132       3.60       0.00       1.00
+     1   130    131       3.60       0.00       1.00
+     1   129    130       3.60       1.74       0.51
+
+ Time of computation ->  20240106.090000      in sec:     464400.
+ Boundary data type TPAR processed, time:      464400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.59       0.00       1.00
+     1   137    138       3.59       0.00       1.00
+     1   136    137       3.59       0.00       1.00
+     1   135    136       3.59       0.00       1.00
+     1   134    135       3.59       0.00       1.00
+     1   133    134       3.59       0.00       1.00
+     1   132    133       3.59       0.00       1.00
+     1   131    132       3.59       0.00       1.00
+     1   130    131       3.59       0.00       1.00
+     1   129    130       3.59       1.74       0.51
+
+ Time of computation ->  20240106.100000      in sec:     468000.
+ Boundary data type TPAR processed, time:      468000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.57       0.00       1.00
+     1   137    138       3.57       0.00       1.00
+     1   136    137       3.57       0.00       1.00
+     1   135    136       3.57       0.00       1.00
+     1   134    135       3.57       0.00       1.00
+     1   133    134       3.57       0.00       1.00
+     1   132    133       3.57       0.00       1.00
+     1   131    132       3.57       0.00       1.00
+     1   130    131       3.57       0.00       1.00
+     1   129    130       3.57       1.74       0.51
+
+ Time of computation ->  20240106.110000      in sec:     471600.
+ Boundary data type TPAR processed, time:      471600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.56       0.00       1.00
+     1   137    138       3.56       0.00       1.00
+     1   136    137       3.56       0.00       1.00
+     1   135    136       3.56       0.00       1.00
+     1   134    135       3.56       0.00       1.00
+     1   133    134       3.56       0.00       1.00
+     1   132    133       3.56       0.00       1.00
+     1   131    132       3.56       0.00       1.00
+     1   130    131       3.56       0.00       1.00
+     1   129    130       3.56       1.74       0.51
+
+ Time of computation ->  20240106.120000      in sec:     475200.
+ Boundary data type TPAR processed, time:      475200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.53       0.00       1.00
+     1   137    138       3.53       0.00       1.00
+     1   136    137       3.53       0.00       1.00
+     1   135    136       3.53       0.00       1.00
+     1   134    135       3.53       0.00       1.00
+     1   133    134       3.53       0.00       1.00
+     1   132    133       3.53       0.00       1.00
+     1   131    132       3.53       0.00       1.00
+     1   130    131       3.53       0.00       1.00
+     1   129    130       3.53       1.74       0.51
+
+ Time of computation ->  20240106.130000      in sec:     478800.
+ Boundary data type TPAR processed, time:      478800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.51       0.00       1.00
+     1   137    138       3.51       0.00       1.00
+     1   136    137       3.51       0.00       1.00
+     1   135    136       3.51       0.00       1.00
+     1   134    135       3.51       0.00       1.00
+     1   133    134       3.51       0.00       1.00
+     1   132    133       3.51       0.00       1.00
+     1   131    132       3.51       0.00       1.00
+     1   130    131       3.51       0.00       1.00
+     1   129    130       3.51       1.74       0.50
+
+ Time of computation ->  20240106.140000      in sec:     482400.
+ Boundary data type TPAR processed, time:      482400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.49       0.00       1.00
+     1   137    138       3.49       0.00       1.00
+     1   136    137       3.49       0.00       1.00
+     1   135    136       3.49       0.00       1.00
+     1   134    135       3.49       0.00       1.00
+     1   133    134       3.49       0.00       1.00
+     1   132    133       3.49       0.00       1.00
+     1   131    132       3.49       0.00       1.00
+     1   130    131       3.49       0.00       1.00
+     1   129    130       3.49       1.74       0.50
+
+ Time of computation ->  20240106.150000      in sec:     486000.
+ Boundary data type TPAR processed, time:      486000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.47       0.00       1.00
+     1   137    138       3.47       0.00       1.00
+     1   136    137       3.47       0.00       1.00
+     1   135    136       3.47       0.00       1.00
+     1   134    135       3.47       0.00       1.00
+     1   133    134       3.47       0.00       1.00
+     1   132    133       3.47       0.00       1.00
+     1   131    132       3.47       0.00       1.00
+     1   130    131       3.47       0.00       1.00
+     1   129    130       3.47       1.74       0.50
+
+ Time of computation ->  20240106.160000      in sec:     489600.
+ Boundary data type TPAR processed, time:      489600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.46       0.00       1.00
+     1   137    138       3.46       0.00       1.00
+     1   136    137       3.46       0.00       1.00
+     1   135    136       3.46       0.00       1.00
+     1   134    135       3.46       0.00       1.00
+     1   133    134       3.46       0.00       1.00
+     1   132    133       3.46       0.00       1.00
+     1   131    132       3.46       0.00       1.00
+     1   130    131       3.46       0.00       1.00
+     1   129    130       3.46       1.74       0.50
+
+ Time of computation ->  20240106.170000      in sec:     493200.
+ Boundary data type TPAR processed, time:      493200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.44       0.00       1.00
+     1   137    138       3.44       0.00       1.00
+     1   136    137       3.44       0.00       1.00
+     1   135    136       3.44       0.00       1.00
+     1   134    135       3.44       0.00       1.00
+     1   133    134       3.44       0.00       1.00
+     1   132    133       3.44       0.00       1.00
+     1   131    132       3.44       0.00       1.00
+     1   130    131       3.44       0.00       1.00
+     1   129    130       3.44       1.74       0.49
+
+ Time of computation ->  20240106.180000      in sec:     496800.
+ Boundary data type TPAR processed, time:      496800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.40       0.00       1.00
+     1   137    138       3.40       0.00       1.00
+     1   136    137       3.40       0.00       1.00
+     1   135    136       3.40       0.00       1.00
+     1   134    135       3.40       0.00       1.00
+     1   133    134       3.40       0.00       1.00
+     1   132    133       3.40       0.00       1.00
+     1   131    132       3.40       0.00       1.00
+     1   130    131       3.40       0.00       1.00
+     1   129    130       3.40       1.74       0.49
+
+ Time of computation ->  20240106.190000      in sec:     500400.
+ Boundary data type TPAR processed, time:      500400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.22       0.00       1.00
+     1   137    138       3.22       0.00       1.00
+     1   136    137       3.22       0.00       1.00
+     1   135    136       3.22       0.00       1.00
+     1   134    135       3.22       0.00       1.00
+     1   133    134       3.22       0.00       1.00
+     1   132    133       3.22       0.00       1.00
+     1   131    132       3.22       0.00       1.00
+     1   130    131       3.22       0.00       1.00
+     1   129    130       3.22       1.74       0.46
+
+ Time of computation ->  20240106.200000      in sec:     504000.
+ Boundary data type TPAR processed, time:      504000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.42       0.00       1.00
+     1   137    138       2.42       0.00       1.00
+     1   136    137       2.42       0.00       1.00
+     1   135    136       2.42       0.00       1.00
+     1   134    135       2.42       0.00       1.00
+     1   133    134       2.42       0.00       1.00
+     1   132    133       2.42       0.00       1.00
+     1   131    132       2.42       0.00       1.00
+     1   130    131       2.42       0.00       1.00
+     1   129    130       2.42       1.74       0.28
+
+ Time of computation ->  20240106.210000      in sec:     507600.
+ Boundary data type TPAR processed, time:      507600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   174    175       1.07       1.19       0.11
+     1   173    174       1.07       1.24       0.15
+     1   172    173       1.07       1.26       0.18
+     1   171    172       1.07       1.27       0.18
+     1   170    171       1.07       1.26       0.18
+     1   169    170       1.07       1.25       0.17
+     1   168    169       1.07       1.26       0.17
+     1   167    168       1.07       1.27       0.18
+     1   166    167       1.07       1.24       0.16
+     1   165    166       1.07       1.23       0.15
+     1   164    165       1.07       1.22       0.14
+     1   163    164       1.07       1.21       0.13
+     1   162    163       1.07       1.20       0.12
+     1   161    162       1.07       1.19       0.11
+     1   160    161       1.07       1.18       0.10
+     1   151    152       1.07       1.19       0.11
+     1   150    151       1.07       1.20       0.12
+     1   149    150       1.07       1.18       0.10
+     1   138    139       1.07       0.00       1.00
+     1   137    138       1.07       0.00       1.00
+     1   136    137       1.07       0.00       1.00
+     1   135    136       1.07       0.00       1.00
+     1   134    135       1.07       0.00       1.00
+     1   133    134       1.07       0.00       1.00
+     1   132    133       1.07       0.00       1.00
+     1   131    132       1.07       0.00       1.00
+     1   130    131       1.07       0.00       1.00
+     1    99    100       1.07       1.19       0.11
+     1    98     99       1.07       1.21       0.13
+     1    97     98       1.07       1.23       0.15
+     1    96     97       1.07       1.24       0.16
+     1    95     96       1.07       1.24       0.16
+     1    94     95       1.07       1.23       0.15
+     1    93     94       1.07       1.22       0.14
+     1    92     93       1.07       1.21       0.13
+     1    91     92       1.07       1.19       0.11
+
+ Time of computation ->  20240106.220000      in sec:     511200.
+ Boundary data type TPAR processed, time:      511200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   167    168       1.15       1.28       0.11
+     1   138    139       1.15       0.00       1.00
+     1   137    138       1.15       0.00       1.00
+     1   136    137       1.15       0.00       1.00
+     1   135    136       1.15       0.00       1.00
+     1   134    135       1.15       0.00       1.00
+     1   133    134       1.15       0.00       1.00
+     1   132    133       1.15       0.00       1.00
+     1   131    132       1.15       0.00       1.00
+     1   130    131       1.15       0.00       1.00
+
+ Time of computation ->  20240106.230000      in sec:     514800.
+ Boundary data type TPAR processed, time:      514800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.30       0.00       1.00
+     1   137    138       1.30       0.00       1.00
+     1   136    137       1.30       0.00       1.00
+     1   135    136       1.30       0.00       1.00
+     1   134    135       1.30       0.00       1.00
+     1   133    134       1.30       0.00       1.00
+     1   132    133       1.30       0.00       1.00
+     1   131    132       1.30       0.00       1.00
+     1   130    131       1.30       0.00       1.00
+
+ Time of computation ->  20240107.000000      in sec:     518400.
+ Boundary data type TPAR processed, time:      518400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.64       0.00       1.00
+     1   137    138       2.64       0.00       1.00
+     1   136    137       2.64       0.00       1.00
+     1   135    136       2.64       0.00       1.00
+     1   134    135       2.64       0.00       1.00
+     1   133    134       2.64       0.00       1.00
+     1   132    133       2.64       0.00       1.00
+     1   131    132       2.64       0.00       1.00
+     1   130    131       2.64       0.00       1.00
+     1   129    130       2.64       1.74       0.34
+
+ Time of computation ->  20240107.010000      in sec:     522000.
+ Boundary data type TPAR processed, time:      522000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.57       0.00       1.00
+     1   137    138       3.57       0.00       1.00
+     1   136    137       3.57       0.00       1.00
+     1   135    136       3.57       0.00       1.00
+     1   134    135       3.57       0.00       1.00
+     1   133    134       3.57       0.00       1.00
+     1   132    133       3.57       0.00       1.00
+     1   131    132       3.57       0.00       1.00
+     1   130    131       3.57       0.00       1.00
+     1   129    130       3.57       1.74       0.51
+
+ Time of computation ->  20240107.020000      in sec:     525600.
+ Boundary data type TPAR processed, time:      525600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.97       0.00       1.00
+     1   137    138       3.97       0.00       1.00
+     1   136    137       3.97       0.00       1.00
+     1   135    136       3.97       0.00       1.00
+     1   134    135       3.97       0.00       1.00
+     1   133    134       3.97       0.00       1.00
+     1   132    133       3.97       0.00       1.00
+     1   131    132       3.97       0.00       1.00
+     1   130    131       3.97       0.00       1.00
+     1   129    130       3.97       1.74       0.56
+
+ Time of computation ->  20240107.030000      in sec:     529200.
+ Boundary data type TPAR processed, time:      529200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.81       0.00       1.00
+     1   137    138       3.81       0.00       1.00
+     1   136    137       3.81       0.00       1.00
+     1   135    136       3.81       0.00       1.00
+     1   134    135       3.81       0.00       1.00
+     1   133    134       3.81       0.00       1.00
+     1   132    133       3.81       0.00       1.00
+     1   131    132       3.81       0.00       1.00
+     1   130    131       3.81       0.00       1.00
+     1   129    130       3.81       1.74       0.54
+
+ Time of computation ->  20240107.040000      in sec:     532800.
+ Boundary data type TPAR processed, time:      532800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       3.33       0.00       1.00
+     1   137    138       3.33       0.00       1.00
+     1   136    137       3.33       0.00       1.00
+     1   135    136       3.33       0.00       1.00
+     1   134    135       3.33       0.00       1.00
+     1   133    134       3.33       0.00       1.00
+     1   132    133       3.33       0.00       1.00
+     1   131    132       3.33       0.00       1.00
+     1   130    131       3.33       0.00       1.00
+     1   129    130       3.33       1.74       0.48
+
+ Time of computation ->  20240107.050000      in sec:     536400.
+ Boundary data type TPAR processed, time:      536400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.78       0.00       1.00
+     1   137    138       2.78       0.00       1.00
+     1   136    137       2.78       0.00       1.00
+     1   135    136       2.78       0.00       1.00
+     1   134    135       2.78       0.00       1.00
+     1   133    134       2.78       0.00       1.00
+     1   132    133       2.78       0.00       1.00
+     1   131    132       2.78       0.00       1.00
+     1   130    131       2.78       0.00       1.00
+     1   129    130       2.78       1.74       0.37
+
+ Time of computation ->  20240107.060000      in sec:     540000.
+ Boundary data type TPAR processed, time:      540000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.33       0.00       1.00
+     1   137    138       2.33       0.00       1.00
+     1   136    137       2.33       0.00       1.00
+     1   135    136       2.33       0.00       1.00
+     1   134    135       2.33       0.00       1.00
+     1   133    134       2.33       0.00       1.00
+     1   132    133       2.33       0.00       1.00
+     1   131    132       2.33       0.00       1.00
+     1   130    131       2.33       0.00       1.00
+     1   129    130       2.33       1.74       0.25
+
+ Time of computation ->  20240107.070000      in sec:     543600.
+ Boundary data type TPAR processed, time:      543600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.89       0.00       1.00
+     1   137    138       1.89       0.00       1.00
+     1   136    137       1.89       0.00       1.00
+     1   135    136       1.89       0.00       1.00
+     1   134    135       1.89       0.00       1.00
+     1   133    134       1.89       0.00       1.00
+     1   132    133       1.89       0.00       1.00
+     1   131    132       1.89       0.00       1.00
+     1   130    131       1.89       0.00       1.00
+
+ Time of computation ->  20240107.080000      in sec:     547200.
+ Boundary data type TPAR processed, time:      547200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.59       0.00       1.00
+     1   137    138       1.59       0.00       1.00
+     1   136    137       1.59       0.00       1.00
+     1   135    136       1.59       0.00       1.00
+     1   134    135       1.59       0.00       1.00
+     1   133    134       1.59       0.00       1.00
+     1   132    133       1.59       0.00       1.00
+     1   131    132       1.59       0.00       1.00
+     1   130    131       1.59       0.00       1.00
+
+ Time of computation ->  20240107.090000      in sec:     550800.
+ Boundary data type TPAR processed, time:      550800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.45       0.00       1.00
+     1   137    138       1.45       0.00       1.00
+     1   136    137       1.45       0.00       1.00
+     1   135    136       1.45       0.00       1.00
+     1   134    135       1.45       0.00       1.00
+     1   133    134       1.45       0.00       1.00
+     1   132    133       1.45       0.00       1.00
+     1   131    132       1.45       0.00       1.00
+     1   130    131       1.45       0.00       1.00
+
+ Time of computation ->  20240107.100000      in sec:     554400.
+ Boundary data type TPAR processed, time:      554400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.32       0.00       1.00
+     1   137    138       1.32       0.00       1.00
+     1   136    137       1.32       0.00       1.00
+     1   135    136       1.32       0.00       1.00
+     1   134    135       1.32       0.00       1.00
+     1   133    134       1.32       0.00       1.00
+     1   132    133       1.32       0.00       1.00
+     1   131    132       1.32       0.00       1.00
+     1   130    131       1.32       0.00       1.00
+
+ Time of computation ->  20240107.110000      in sec:     558000.
+ Boundary data type TPAR processed, time:      558000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.24       0.00       1.00
+     1   137    138       1.24       0.00       1.00
+     1   136    137       1.24       0.00       1.00
+     1   135    136       1.24       0.00       1.00
+     1   134    135       1.24       0.00       1.00
+     1   133    134       1.24       0.00       1.00
+     1   132    133       1.24       0.00       1.00
+     1   131    132       1.24       0.00       1.00
+     1   130    131       1.24       0.00       1.00
+
+ Time of computation ->  20240107.120000      in sec:     561600.
+ Boundary data type TPAR processed, time:      561600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.21       0.00       1.00
+     1   137    138       1.21       0.00       1.00
+     1   136    137       1.21       0.00       1.00
+     1   135    136       1.21       0.00       1.00
+     1   134    135       1.21       0.00       1.00
+     1   133    134       1.21       0.00       1.00
+     1   132    133       1.21       0.00       1.00
+     1   131    132       1.21       0.00       1.00
+     1   130    131       1.21       0.00       1.00
+
+ Time of computation ->  20240107.130000      in sec:     565200.
+ Boundary data type TPAR processed, time:      565200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.15       0.00       1.00
+     1   137    138       1.15       0.00       1.00
+     1   136    137       1.15       0.00       1.00
+     1   135    136       1.15       0.00       1.00
+     1   134    135       1.15       0.00       1.00
+     1   133    134       1.15       0.00       1.00
+     1   132    133       1.15       0.00       1.00
+     1   131    132       1.15       0.00       1.00
+     1   130    131       1.15       0.00       1.00
+
+ Time of computation ->  20240107.140000      in sec:     568800.
+ Boundary data type TPAR processed, time:      568800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.11       0.00       1.00
+     1   137    138       1.11       0.00       1.00
+     1   136    137       1.11       0.00       1.00
+     1   135    136       1.11       0.00       1.00
+     1   134    135       1.11       0.00       1.00
+     1   133    134       1.11       0.00       1.00
+     1   132    133       1.11       0.00       1.00
+     1   131    132       1.11       0.00       1.00
+     1   130    131       1.11       0.00       1.00
+
+ Time of computation ->  20240107.150000      in sec:     572400.
+ Boundary data type TPAR processed, time:      572400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.09       0.00       1.00
+     1   137    138       1.09       0.00       1.00
+     1   136    137       1.09       0.00       1.00
+     1   135    136       1.09       0.00       1.00
+     1   134    135       1.09       0.00       1.00
+     1   133    134       1.09       0.00       1.00
+     1   132    133       1.09       0.00       1.00
+     1   131    132       1.09       0.00       1.00
+     1   130    131       1.09       0.00       1.00
+
+ Time of computation ->  20240107.160000      in sec:     576000.
+ Boundary data type TPAR processed, time:      576000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.07       0.00       1.00
+     1   137    138       1.07       0.00       1.00
+     1   136    137       1.07       0.00       1.00
+     1   135    136       1.07       0.00       1.00
+     1   134    135       1.07       0.00       1.00
+     1   133    134       1.07       0.00       1.00
+     1   132    133       1.07       0.00       1.00
+     1   131    132       1.07       0.00       1.00
+     1   130    131       1.07       0.00       1.00
+
+ Time of computation ->  20240107.170000      in sec:     579600.
+ Boundary data type TPAR processed, time:      579600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.06       0.00       1.00
+     1   137    138       1.06       0.00       1.00
+     1   136    137       1.06       0.00       1.00
+     1   135    136       1.06       0.00       1.00
+     1   134    135       1.06       0.00       1.00
+     1   133    134       1.06       0.00       1.00
+     1   132    133       1.06       0.00       1.00
+     1   131    132       1.06       0.00       1.00
+     1   130    131       1.06       0.00       1.00
+
+ Time of computation ->  20240107.180000      in sec:     583200.
+ Boundary data type TPAR processed, time:      583200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.04       0.00       1.00
+     1   137    138       1.04       0.00       1.00
+     1   136    137       1.04       0.00       1.00
+     1   135    136       1.04       0.00       1.00
+     1   134    135       1.04       0.00       1.00
+     1   133    134       1.04       0.00       1.00
+     1   132    133       1.04       0.00       1.00
+     1   131    132       1.04       0.00       1.00
+     1   130    131       1.04       0.00       1.00
+
+ Time of computation ->  20240107.190000      in sec:     586800.
+ Boundary data type TPAR processed, time:      586800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.03       0.00       1.00
+     1   137    138       1.03       0.00       1.00
+     1   136    137       1.03       0.00       1.00
+     1   135    136       1.03       0.00       1.00
+     1   134    135       1.03       0.00       1.00
+     1   133    134       1.03       0.00       1.00
+     1   132    133       1.03       0.00       1.00
+     1   131    132       1.03       0.00       1.00
+     1   130    131       1.03       0.00       1.00
+
+ Time of computation ->  20240107.200000      in sec:     590400.
+ Boundary data type TPAR processed, time:      590400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.02       0.00       1.00
+     1   137    138       1.02       0.00       1.00
+     1   136    137       1.02       0.00       1.00
+     1   135    136       1.02       0.00       1.00
+     1   134    135       1.02       0.00       1.00
+     1   133    134       1.02       0.00       1.00
+     1   132    133       1.02       0.00       1.00
+     1   131    132       1.02       0.00       1.00
+     1   130    131       1.02       0.00       1.00
+
+ Time of computation ->  20240107.210000      in sec:     594000.
+ Boundary data type TPAR processed, time:      594000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.00       0.00       1.00
+     1   137    138       1.00       0.00       1.00
+     1   136    137       1.00       0.00       1.00
+     1   135    136       1.00       0.00       1.00
+     1   134    135       1.00       0.00       1.00
+     1   133    134       1.00       0.00       1.00
+     1   132    133       1.00       0.00       1.00
+     1   131    132       1.00       0.00       1.00
+     1   130    131       1.00       0.00       1.00
+
+ Time of computation ->  20240107.220000      in sec:     597600.
+ Boundary data type TPAR processed, time:      597600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.04       0.00       1.00
+     1   137    138       1.04       0.00       1.00
+     1   136    137       1.04       0.00       1.00
+     1   135    136       1.04       0.00       1.00
+     1   134    135       1.04       0.00       1.00
+     1   133    134       1.04       0.00       1.00
+     1   132    133       1.04       0.00       1.00
+     1   131    132       1.04       0.00       1.00
+     1   130    131       1.04       0.00       1.00
+
+ Time of computation ->  20240107.230000      in sec:     601200.
+ Boundary data type TPAR processed, time:      601200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.07       0.00       1.00
+     1   137    138       1.07       0.00       1.00
+     1   136    137       1.07       0.00       1.00
+     1   135    136       1.07       0.00       1.00
+     1   134    135       1.07       0.00       1.00
+     1   133    134       1.07       0.00       1.00
+     1   132    133       1.07       0.00       1.00
+     1   131    132       1.07       0.00       1.00
+     1   130    131       1.07       0.00       1.00
+
+ Time of computation ->  20240108.000000      in sec:     604800.
+ Boundary data type TPAR processed, time:      604800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.12       0.00       1.00
+     1   137    138       1.12       0.00       1.00
+     1   136    137       1.12       0.00       1.00
+     1   135    136       1.12       0.00       1.00
+     1   134    135       1.12       0.00       1.00
+     1   133    134       1.12       0.00       1.00
+     1   132    133       1.12       0.00       1.00
+     1   131    132       1.12       0.00       1.00
+     1   130    131       1.12       0.00       1.00
+
+ Time of computation ->  20240108.010000      in sec:     608400.
+ Boundary data type TPAR processed, time:      608400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.24       0.00       1.00
+     1   137    138       1.24       0.00       1.00
+     1   136    137       1.24       0.00       1.00
+     1   135    136       1.24       0.00       1.00
+     1   134    135       1.24       0.00       1.00
+     1   133    134       1.24       0.00       1.00
+     1   132    133       1.24       0.00       1.00
+     1   131    132       1.24       0.00       1.00
+     1   130    131       1.24       0.00       1.00
+
+ Time of computation ->  20240108.020000      in sec:     612000.
+ Boundary data type TPAR processed, time:      612000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.47       0.00       1.00
+     1   137    138       1.47       0.00       1.00
+     1   136    137       1.47       0.00       1.00
+     1   135    136       1.47       0.00       1.00
+     1   134    135       1.47       0.00       1.00
+     1   133    134       1.47       0.00       1.00
+     1   132    133       1.47       0.00       1.00
+     1   131    132       1.47       0.00       1.00
+     1   130    131       1.47       0.00       1.00
+
+ Time of computation ->  20240108.030000      in sec:     615600.
+ Boundary data type TPAR processed, time:      615600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.85       0.00       1.00
+     1   137    138       1.85       0.00       1.00
+     1   136    137       1.85       0.00       1.00
+     1   135    136       1.85       0.00       1.00
+     1   134    135       1.85       0.00       1.00
+     1   133    134       1.85       0.00       1.00
+     1   132    133       1.85       0.00       1.00
+     1   131    132       1.85       0.00       1.00
+     1   130    131       1.85       0.00       1.00
+
+ Time of computation ->  20240108.040000      in sec:     619200.
+ Boundary data type TPAR processed, time:      619200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.31       0.00       1.00
+     1   137    138       2.31       0.00       1.00
+     1   136    137       2.31       0.00       1.00
+     1   135    136       2.31       0.00       1.00
+     1   134    135       2.31       0.00       1.00
+     1   133    134       2.31       0.00       1.00
+     1   132    133       2.31       0.00       1.00
+     1   131    132       2.31       0.00       1.00
+     1   130    131       2.31       0.00       1.00
+     1   129    130       2.31       1.74       0.25
+
+ Time of computation ->  20240108.050000      in sec:     622800.
+ Boundary data type TPAR processed, time:      622800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.56       0.00       1.00
+     1   137    138       2.56       0.00       1.00
+     1   136    137       2.56       0.00       1.00
+     1   135    136       2.56       0.00       1.00
+     1   134    135       2.56       0.00       1.00
+     1   133    134       2.56       0.00       1.00
+     1   132    133       2.56       0.00       1.00
+     1   131    132       2.56       0.00       1.00
+     1   130    131       2.56       0.00       1.00
+     1   129    130       2.56       1.74       0.32
+
+ Time of computation ->  20240108.060000      in sec:     626400.
+ Boundary data type TPAR processed, time:      626400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.53       0.00       1.00
+     1   137    138       2.53       0.00       1.00
+     1   136    137       2.53       0.00       1.00
+     1   135    136       2.53       0.00       1.00
+     1   134    135       2.53       0.00       1.00
+     1   133    134       2.53       0.00       1.00
+     1   132    133       2.53       0.00       1.00
+     1   131    132       2.53       0.00       1.00
+     1   130    131       2.53       0.00       1.00
+     1   129    130       2.53       1.74       0.31
+
+ Time of computation ->  20240108.070000      in sec:     630000.
+ Boundary data type TPAR processed, time:      630000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.35       0.00       1.00
+     1   137    138       2.35       0.00       1.00
+     1   136    137       2.35       0.00       1.00
+     1   135    136       2.35       0.00       1.00
+     1   134    135       2.35       0.00       1.00
+     1   133    134       2.35       0.00       1.00
+     1   132    133       2.35       0.00       1.00
+     1   131    132       2.35       0.00       1.00
+     1   130    131       2.35       0.00       1.00
+     1   129    130       2.35       1.74       0.26
+
+ Time of computation ->  20240108.080000      in sec:     633600.
+ Boundary data type TPAR processed, time:      633600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       2.15       0.00       1.00
+     1   137    138       2.15       0.00       1.00
+     1   136    137       2.15       0.00       1.00
+     1   135    136       2.15       0.00       1.00
+     1   134    135       2.15       0.00       1.00
+     1   133    134       2.15       0.00       1.00
+     1   132    133       2.15       0.00       1.00
+     1   131    132       2.15       0.00       1.00
+     1   130    131       2.15       0.00       1.00
+     1   129    130       2.15       1.74       0.19
+
+ Time of computation ->  20240108.090000      in sec:     637200.
+ Boundary data type TPAR processed, time:      637200.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.96       0.00       1.00
+     1   137    138       1.96       0.00       1.00
+     1   136    137       1.96       0.00       1.00
+     1   135    136       1.96       0.00       1.00
+     1   134    135       1.96       0.00       1.00
+     1   133    134       1.96       0.00       1.00
+     1   132    133       1.96       0.00       1.00
+     1   131    132       1.96       0.00       1.00
+     1   130    131       1.96       0.00       1.00
+     1   129    130       1.96       1.74       0.11
+
+ Time of computation ->  20240108.100000      in sec:     640800.
+ Boundary data type TPAR processed, time:      640800.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.83       0.00       1.00
+     1   137    138       1.83       0.00       1.00
+     1   136    137       1.83       0.00       1.00
+     1   135    136       1.83       0.00       1.00
+     1   134    135       1.83       0.00       1.00
+     1   133    134       1.83       0.00       1.00
+     1   132    133       1.83       0.00       1.00
+     1   131    132       1.83       0.00       1.00
+     1   130    131       1.83       0.00       1.00
+
+ Time of computation ->  20240108.110000      in sec:     644400.
+ Boundary data type TPAR processed, time:      644400.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.53       0.00       1.00
+     1   137    138       1.53       0.00       1.00
+     1   136    137       1.53       0.00       1.00
+     1   135    136       1.53       0.00       1.00
+     1   134    135       1.53       0.00       1.00
+     1   133    134       1.53       0.00       1.00
+     1   132    133       1.53       0.00       1.00
+     1   131    132       1.53       0.00       1.00
+     1   130    131       1.53       0.00       1.00
+
+ Time of computation ->  20240108.120000      in sec:     648000.
+ Boundary data type TPAR processed, time:      648000.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       1.17       0.00       1.00
+     1   137    138       1.17       0.00       1.00
+     1   136    137       1.17       0.00       1.00
+     1   135    136       1.17       0.00       1.00
+     1   134    135       1.17       0.00       1.00
+     1   133    134       1.17       0.00       1.00
+     1   132    133       1.17       0.00       1.00
+     1   131    132       1.17       0.00       1.00
+     1   130    131       1.17       0.00       1.00
+
+ Time of computation ->  20240108.130000      in sec:     651600.
+ Boundary data type TPAR processed, time:      651600.
+ not possible to compute, first iteration
+
+  ** WARNING : Differences in wave height at the boundary
+ Relative difference between input and computation >=   0.10
+                         Hs[m]      Hs[m]      Hs[-]
+     ix    iy  index   (input) (computed) (relative)
+  --------------------------------------------------
+     1   138    139       0.92       0.00       1.00
+     1   137    138       0.92       0.00       1.00
+     1   136    137       0.92       0.00       1.00
+     1   135    136       0.92       0.00       1.00
+     1   134    135       0.92       0.00       1.00
