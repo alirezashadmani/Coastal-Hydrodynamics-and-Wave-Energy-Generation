@@ -1,6 +1,6 @@
 !*********************************STARTUP****************************************
 !
-PROJECT  'CalBay_Nest'  'C'
+PROJECT  'CalBay_Nest'  'F'
 !
 SET NAUTical
 !
@@ -10,19 +10,21 @@ COORDinates SPHErical CCM
 !
 !*****************************MODEL DESCRIPTION**********************************
 !
-! PARENT (coarse) grid: same as the original California Bay model
-! Rotated 22.467 deg, origin at SF Bay entrance
-! 120 x 216 cells at ~0.00416 deg resolution (~460 m)
+! NESTED (fine) grid: high-resolution domain over the WEC deployment zone
+! Centered on the high-energy area identified by AHP-TOPSIS site selection
+! Origin: (-122.40, 37.60), Size: 0.30 x 0.30 deg, Rotation: 0 deg
+! 300 x 300 cells at ~0.001 deg resolution (~100 m)
+! Resolution ratio: ~4.2x finer than the coarse grid (~460 m -> ~100 m)
 !
-CGRID REGular -122.3018 37.2947 22.467 0.4992 0.8986 120 216 CIRcle 36 0.04 0.5 30
+CGRID REGular -122.40 37.60 0. 0.30 0.30 300 300 CIRcle 36 0.04 0.5 30
 !
 !*****************************INPUT GRIDS & DATA*********************************
 !
-! Bathymetry from GEBCO (1680 x 1920 cells, 0.00417 deg)
+! Bathymetry: same GEBCO file — SWAN interpolates to the fine grid
 INPgrid BOTtom REGular -125.0 34.0 0. 1679 1919 0.00416667 0.00416667 EXCeption -32767.
 READinp BOTtom 1.0 'GEBCO.asc' 1 6 FREE
 !
-! Wind from ERA5 (29 lon x 33 lat at 0.25 deg, hourly Jan-Feb 2024)
+! Wind: same ERA5 field
 INPgrid WInd REGular -125.0 34.0 0. 28 32 0.25 0.25 &
        NONSTATionary 20240101.000000 1 HR 20240229.230000
 READinp WInd 1.0 'wind.inp' 3 0 FREE
@@ -31,44 +33,34 @@ READinp WInd 1.0 'wind.inp' 3 0 FREE
 !
 BOUnd SHAPespec JONswap 3.3 PEAK DSPR DEGRees
 !
-! Wave boundary on western (ocean-facing) side from ERA5 TPAR
-BOUndspec SIDE W CCW VARiable FILE 0.0 'BW2.TPAR'
+! --- NESTINP: read spectral boundary from the coarse (parent) run ---
+! Note: NGRID is NOT used in the child model — boundary spectra are applied
+! along the CGRID edges via BOUNdnest1
+BOUNdnest1 NESTing 'nest_boundary.bnd' CLOSed
 !
 !***********************************PHYSICS**************************************
 !
-! Third-generation source terms (Komen et al.)
+! Same physics as the coarse grid for consistency
 GEN3 KOMen 1.36e-5 2.02e-3 DRAG WU AGROW
 !
-! Swell dissipation (Zieger et al.)
 SSWELL ZIEGER 0.00025
 NEGATINP 0.04
 !
-! Whitecapping
 WCAP KOMen 1.36e-5 2.02e-3 2. 1. 1.
 !
-! Depth-induced breaking (Battjes & Janssen)
 BREaking CONstant 1. 0.73
 !
-! Bottom friction (JONSWAP)
 FRICtion JONswap CONstant 0.038
 !
-! Diffraction
 DIFFRACtion 1 0. 0. 1
 !
 !**********************************NUMERICS**************************************
 !
 !***********************************OUTPUT***************************************
 !
-! --- NESTOUT: save spectral boundary for the nested (fine) grid ---
-! The nested grid covers the high-energy deployment zone:
-!   Origin: (-122.40, 37.60), Size: 0.30 x 0.30 deg, Rotation: 0 deg
-!
-NGRID 'nestzn' -122.40 37.60 0. 0.30 0.30 60 60
-NESTOUT 'nestzn' 'nest_boundary.bnd' OUTPUT 20240101.000000 1 HR
-!
-! Block output on coarse grid for comparison
-BLOCK 'COMPGRID' NOHEAD 'coarse_block.mat' LAY-OUT 3 XP YP HSIGN RTP DIR DEPTH &
-      OUTPUT 20240101.030000 6 HR
+! Block output on the fine grid
+BLOCK 'COMPGRID' NOHEAD 'fine_block.mat' LAY-OUT 3 XP YP HSIGN RTP DIR DEPTH &
+      OUTPUT 20240101.030000 1 HR
 !
 !***********************************COMPUTE**************************************
 !

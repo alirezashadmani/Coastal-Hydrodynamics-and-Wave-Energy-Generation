@@ -20,11 +20,6 @@ norm_end
 swaninit
 
 # Large data files (bathymetry, wind input, wave data, tables)
-*.asc
-*.inp
-*.nc
-*.tab
-*.TPAR
 *.bnd
 
 # IDE
