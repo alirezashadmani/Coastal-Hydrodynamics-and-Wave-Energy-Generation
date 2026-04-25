@@ -26,36 +26,42 @@ This repository contains Jupyter notebooks, Python scripts, and model data for t
 ├── README.md
 ├── requirements.txt
 ├── notebooks/                        # Jupyter notebooks (teaching materials)
-│   ├── 01_preprocessing/             # Data inspection & visualization
-│   │   └── preprocessing.ipynb
-│   ├── 02_model_setup/               # SWAN model interface & configuration
-│   │   └── swan_runner.ipynb
-│   ├── 03_site_selection/            # Multi-criteria decision making
-│   │   ├── hybrid_ahp_topsis_site_selection.ipynb  (standalone)
-│   │   └── swan_coupled_ahp_topsis.ipynb           (SWAN-coupled)
-│   ├── 04_optimization/              # Genetic algorithm optimization
-│   │   ├── GA_array.ipynb                          (standalone)
-│   │   └── swan_coupled_ga_array.ipynb             (SWAN-coupled)
-│   ├── 05_postprocessing/            # Output visualization techniques
+│   ├── 01_preprocessing/
+│   │   ├── preprocessing.ipynb
+│   │   └── nested_grid_bathymetry.ipynb
+│   ├── 02_model_setup/
+│   │   ├── swan_runner.ipynb
+│   │   └── nested_grid_setup.ipynb
+│   ├── 03_site_selection/
+│   │   ├── hybrid_ahp_topsis_site_selection.ipynb   (standalone)
+│   │   └── swan_coupled_ahp_topsis.ipynb            (SWAN-coupled)
+│   ├── 04_optimization/
+│   │   ├── GA_array.ipynb                           (standalone)
+│   │   └── swan_coupled_ga_array.ipynb              (SWAN-coupled)
+│   ├── 05_postprocessing/
 │   │   └── postprocessing_swan.ipynb
-│   └── 06_model_validation/          # Statistical validation metrics
+│   └── 06_model_validation/
 │       └── model_validation.ipynb
-├── code/                             # Original Python scripts
+├── code/
+│   ├── regions.py                    # Single source of truth for region paths/config
+│   └── swan_runner.py                # Hardened SWAN interface (run, parse TABLE/BLOCK)
+├── tools/
+│   ├── build_tpar_files.py           # CLI: regenerate TPAR boundary files from ERA5
+│   └── _nb_utils.py                  # Notebook-editing helpers
+├── figs/                             # Per-notebook + per-region output folders
+│   └── <nb>/<region>/                #   (auto-created on first run)
 ├── california_bay.F/                 # California Bay SWAN model files & data
-│   ├── INPUT                         # SWAN input file
-│   ├── GEBCO.asc                     # Bathymetry (GEBCO ASCII grid)
-│   ├── WAVE.nc                       # ERA5 wave reanalysis (NetCDF)
-│   ├── WIND.nc                       # ERA5 wind reanalysis (NetCDF)
-│   ├── wind.inp                      # Formatted wind input for SWAN
-│   └── BW2.TPAR                      # Wave boundary conditions (TPAR format)
-└── Oman/                             # Oman Coast SWAN model files & data
-    ├── model.swn                     # SWAN input file
-    ├── gebco.asc                     # Bathymetry
-    ├── Wave-2021-April-May.nc        # ERA5 wave reanalysis
-    ├── Wind-2021-April-May.nc        # ERA5 wind reanalysis
-    ├── wind.inp                      # Formatted wind input for SWAN
-    └── B*.TPAR                       # Boundary condition files (W/S/E sides)
+│   ├── INPUT, GEBCO.asc, WAVE.nc, WIND.nc, wind.inp, BW2.TPAR
+└── Oman/                             # Sea of Oman SWAN model files & data
+    ├── model.swn, gebco.asc, Wave-2021-April-May.nc, Wind-2021-April-May.nc,
+    └── wind.inp, B[WSE]*.TPAR        # 40 active TPARs on the W/S/E boundaries
 ```
+
+The whole pipeline is **region-agnostic**: every notebook reads
+`os.environ["SWAN_REGION"]` (or falls back to `california_bay`) and pulls every
+path, time window, grid spec, and active-TPAR list from `code/regions.py`. To
+add a new case study, append an entry to `_REGISTRY` in that file — no notebook
+needs to change.
 
 ---
 
@@ -76,11 +82,66 @@ pip install -r requirements.txt
 
 ### 3. Run the Notebooks
 
+Pick a region by setting the `SWAN_REGION` environment variable, then launch
+Jupyter. The same notebook reconfigures itself for whichever region is
+selected.
+
 ```bash
-jupyter notebook
+# Run any notebook for California Bay (the default if SWAN_REGION is unset):
+SWAN_REGION=california_bay jupyter notebook notebooks/06_model_validation/model_validation.ipynb
+
+# Run the same notebook for the Sea of Oman:
+SWAN_REGION=oman           jupyter notebook notebooks/06_model_validation/model_validation.ipynb
 ```
 
-Navigate to the `notebooks/` directory and work through the notebooks in order (01 through 06). Notebooks in `01_preprocessing`, `03_site_selection` (standalone), `04_optimization` (standalone), `05_postprocessing`, and `06_model_validation` can run without SWAN installed. The SWAN-coupled notebooks require a working SWAN installation (see below).
+Outputs land in `figs/<notebook>/<region>/` (created automatically). Each
+notebook also calls `cfg.check_inputs()` on first cell, so any missing input
+file is reported up front with the exact path that needs to be supplied.
+
+Notebooks in `01_preprocessing`, `03_site_selection` (standalone),
+`04_optimization` (standalone), `05_postprocessing`, and `06_model_validation`
+can run without SWAN installed (assuming the SWAN-derived inputs they need are
+already on disk). The SWAN-coupled notebooks (3b, 4b) require a working SWAN
+installation (see below).
+
+### 4. Regenerate TPAR Boundary Files (optional)
+
+If your ERA5 NetCDFs change, or you want to extend the boundary, regenerate
+the TPAR files from ERA5 via the bundled CLI tool:
+
+```bash
+# Regenerate Oman TPARs (40 active boundary points)
+python tools/build_tpar_files.py --region oman
+
+# Regenerate California Bay TPAR (single boundary point)
+python tools/build_tpar_files.py --region california_bay
+
+# Preview without writing anything
+python tools/build_tpar_files.py --region oman --dry-run
+```
+
+### 5. Add a New Region
+
+Add an entry to `_REGISTRY` in `code/regions.py`:
+
+```python
+'north_sea': RegionConfig(
+    key='north_sea',
+    display_name='North Sea',
+    description='...',
+    model_subdir='north_sea.F',
+    swan_input_name='INPUT',
+    bathy_file='gebco.asc',
+    wave_nc='WAVE.nc',
+    wind_nc='WIND.nc',
+    domain_bounds=(...), grid_origin=(...), grid_extent_deg=(...),
+    grid_nc=(...), t_start=..., t_end=...,
+    active_tpars=(...),
+),
+```
+
+No notebook needs to change. Run any notebook with
+`SWAN_REGION=north_sea jupyter notebook ...`.
 
 ---
 

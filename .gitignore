@@ -43,3 +43,23 @@ Oman/*.ipynb
 sources/
 figs/
 swan4151/
+
+# Nested-grid model directory is huge (4+ GB) — regenerated from INPUT_coarse/INPUT_fine
+california_bay_nested.F/
+
+# Generated SWAN run scripts that the notebooks create on the fly
+ahp_run.swn
+ga_run.swn
+calib_run.swn
+
+# Local scratch / per-run artefacts
+*.tab.bak
+ahp_run.prt
+ga_run.prt
+candidate_sites.dat
+site_output.tab
+ga_block.mat
+ga_block_*.mat
+
+# Internal report (kept locally only — see in-repo docs for the user-facing summary)
+FINAL_REPORT.md
