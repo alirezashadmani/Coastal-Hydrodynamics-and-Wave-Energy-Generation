@@ -14,8 +14,8 @@ This repository contains Jupyter notebooks, Python scripts, and model data for t
 
 | Region | Location | Data Period | Key Features |
 |--------|----------|-------------|--------------|
-| **California Bay** | San Francisco Coast, USA | Jan-Feb 2024 | Deep-water swell, complex bathymetry, rotated SWAN grid |
-| **Oman Coast** | Gulf of Oman / Arabian Sea | Apr-May 2021 | Wind-sea dominated, nested boundaries (W/S/E), calibration runs |
+| **California Bay** | San Francisco Coast, USA | 2024 | Deep-water swell, complex bathymetry, rotated SWAN grid |
+| **Oman Coast** | Gulf of Oman / Arabian Sea | 2021 | Wind-sea dominated, nested boundaries (W/S/E), calibration runs |
 
 ---
 
@@ -25,7 +25,7 @@ This repository contains Jupyter notebooks, Python scripts, and model data for t
 .
 ├── README.md
 ├── requirements.txt
-├── notebooks/                        # Jupyter notebooks (teaching materials)
+├── notebooks/                        # Jupyter notebooks
 │   ├── 01_preprocessing/
 │   │   ├── preprocessing.ipynb
 │   │   └── nested_grid_bathymetry.ipynb
