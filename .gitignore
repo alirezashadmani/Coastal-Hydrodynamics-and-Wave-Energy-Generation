@@ -62,3 +62,6 @@ ga_block_*.mat
 
 # Internal report (kept locally only — see in-repo docs for the user-facing summary)
 FINAL_REPORT.md
+
+# claude QC
+.claude/
