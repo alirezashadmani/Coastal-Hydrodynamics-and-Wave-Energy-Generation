@@ -327,4 +327,10 @@ This repository accompanies a Wiley textbook. Please cite the textbook when usin
 
 ## Contact
 
-For questions or issues, please open a GitHub issue or contact the authors.
+For questions or issues, please open a GitHub issue or contact the authors:
+
+| Author | Affiliation | Email |
+|--------|-------------|-------|
+| Alireza Shadmani    | University of Technology Sydney (UTS) | alireza.shadmani-1@uts.edu.au |
+| Mohammad Reza Nikoo | Sultan Qaboos University (SQU)        | m.reza@squ.edu.om             |
+| Amir H. Gandomi     | University of Technology Sydney (UTS) | gandomi@uts.edu.au            |

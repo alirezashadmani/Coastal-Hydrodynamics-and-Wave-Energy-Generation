@@ -16,7 +16,6 @@ build/
 *.mat
 *.prt
 *.erf
-*.swn
 norm_end
 swaninit
 
