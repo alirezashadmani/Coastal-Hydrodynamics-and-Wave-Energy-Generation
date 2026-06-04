@@ -15,7 +15,7 @@ This repository contains Jupyter notebooks, Python scripts, and model data for t
 | Region | Location | Data Period | Key Features |
 |--------|----------|-------------|--------------|
 | **California Bay** | San Francisco Coast, USA | 2024 | Deep-water swell, complex bathymetry, rotated SWAN grid |
-| **Oman Coast** | Gulf of Oman / Arabian Sea | 2021 | Wind-sea dominated, nested boundaries (W/S/E), calibration runs |
+| **Oman Coast** | Sea of Oman / Arabian Sea | 2021 | Wind-sea dominated, nested boundaries (W/S/E), calibration runs |
 
 ---
 
