@@ -47,7 +47,8 @@ This repository contains Jupyter notebooks, Python scripts, and model data for t
 │   └── swan_runner.py                # Hardened SWAN interface (run, parse TABLE/BLOCK)
 ├── tools/
 │   ├── build_tpar_files.py           # CLI: regenerate TPAR boundary files from ERA5
-│   └── _nb_utils.py                  # Notebook-editing helpers
+│   ├── check_notebooks.py            # CLI: static checks for all notebooks
+│   └── _nb_utils.py                  # Notebook helpers + canonical bootstrap block
 ├── figs/                             # Per-notebook + per-region output folders
 │   └── <nb>/<region>/                #   (auto-created on first run)
 ├── california_bay.F/                 # California Bay SWAN model files & data

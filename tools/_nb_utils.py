@@ -73,6 +73,28 @@ def clear_outputs(nb: dict) -> None:
 
 
 # ---------------------------------------------------------------------
+# The canonical bootstrap block. Every notebook that imports from code/
+# contains this block verbatim; tools/check_notebooks.py enforces it.
+# (A notebook cannot import a helper before it has found code/, so the
+# block itself has to live in the notebook -- this keeps it identical.)
+# ---------------------------------------------------------------------
+
+BOOTSTRAP_BLOCK = '''\
+# --- bootstrap: locate the repository and make code/ importable ---
+import os, sys
+REPO_ROOT = os.path.abspath(os.getcwd())
+while not os.path.isdir(os.path.join(REPO_ROOT, 'code')):
+    if os.path.dirname(REPO_ROOT) == REPO_ROOT:
+        raise FileNotFoundError('Repository root not found (no code/ directory). '
+                                'Start Jupyter from inside the repository.')
+    REPO_ROOT = os.path.dirname(REPO_ROOT)
+CODE_DIR = os.path.join(REPO_ROOT, 'code')
+if CODE_DIR not in sys.path:
+    sys.path.insert(0, CODE_DIR)
+# --- end bootstrap ---
+'''
+
+# ---------------------------------------------------------------------
 # The canonical "region selection" cell used across notebooks
 # ---------------------------------------------------------------------
 
@@ -83,23 +105,7 @@ REGION_IMPORT_BLOCK = '''\
 # Set REGION to one of: {regions}. The whole notebook is parameterised
 # through the central config in ``code/regions.py``, so no path or
 # time-range strings need to be edited below.
-import os, sys
-
-_search = os.path.abspath(os.getcwd())
-for _ in range(10):
-    if os.path.isdir(os.path.join(_search, 'code')):
-        REPO_ROOT = _search
-        break
-    _search = os.path.dirname(_search)
-else:
-    raise FileNotFoundError(
-        'Could not locate repository root (no code/ directory found). '
-        'Run the notebook from inside the Coastal-Hydrodynamics repo.'
-    )
-_code_dir = os.path.join(REPO_ROOT, 'code')
-if _code_dir not in sys.path:
-    sys.path.insert(0, _code_dir)
-
+''' + BOOTSTRAP_BLOCK + '''
 from regions import get_region, list_regions, summarize   # noqa: E402
 
 REGION = os.environ.get('SWAN_REGION', '{default_region}')
