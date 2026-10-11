@@ -53,7 +53,7 @@ This repository contains Jupyter notebooks, Python scripts, and model data for t
 ├── california_bay.F/                 # California Bay SWAN model files & data
 │   ├── INPUT, GEBCO.asc, WAVE.nc, WIND.nc, wind.inp, BW2.TPAR
 └── Oman/                             # Sea of Oman SWAN model files & data
-    ├── model.swn, gebco.asc, Wave-2021-April-May.nc, Wind-2021-April-May.nc,
+    ├── model.swn, gebco.asc, Wave-2021.nc, Wind-2021.nc,
     └── wind.inp, B[WSE]*.TPAR        # 40 active TPARs on the W/S/E boundaries
 ```
 
@@ -107,7 +107,12 @@ installation (see below).
 ### 4. Regenerate TPAR Boundary Files (optional)
 
 If your ERA5 NetCDFs change, or you want to extend the boundary, regenerate
-the TPAR files from ERA5 via the bundled CLI tool:
+the TPAR files from ERA5 via the bundled CLI tool. The sample point for each
+file is read from the region's SWAN input (the `CGRID` line and each
+`BOUndspec ... VARiable FILE <len> '<file>'` line, honouring SWAN's `CCW`/
+`CLOCKWise` side convention and grid rotation), so it always matches where
+SWAN applies the file. Run with `--dry-run` first: it prints every sample
+point and the maximum change in Hs against the existing file.
 
 ```bash
 # Regenerate Oman TPARs (40 active boundary points)

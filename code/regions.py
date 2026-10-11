@@ -171,6 +171,32 @@ class RegionConfig:
         return out
 
     # ------------------------------------------------------------------
+    # Grid geometry
+    # ------------------------------------------------------------------
+
+    def grid_contains(self, lon, lat, tol: float = 1e-9):
+        """
+        Return a boolean (array) that is True where ``(lon, lat)`` lies inside
+        the SWAN computational grid, honouring ``grid_rotation_deg``.
+
+        The CGRID is rotated about ``grid_origin`` in degree space, exactly as
+        SWAN interprets ``CGRID REG xpc ypc alpc xlenc ylenc ...``. A plain
+        lon/lat bounding-box test is wrong for rotated grids (California).
+        """
+        import numpy as np  # local import keeps this module dependency-light
+
+        lon = np.asarray(lon, dtype=float)
+        lat = np.asarray(lat, dtype=float)
+        x0, y0 = self.grid_origin
+        xlen, ylen = self.grid_extent_deg
+        a = np.deg2rad(self.grid_rotation_deg)
+        dx, dy = lon - x0, lat - y0
+        u = dx * np.cos(a) + dy * np.sin(a)      # along grid x-axis
+        v = -dx * np.sin(a) + dy * np.cos(a)     # along grid y-axis
+        return ((u >= -tol) & (u <= xlen + tol)
+                & (v >= -tol) & (v <= ylen + tol))
+
+    # ------------------------------------------------------------------
     # Validation
     # ------------------------------------------------------------------
 

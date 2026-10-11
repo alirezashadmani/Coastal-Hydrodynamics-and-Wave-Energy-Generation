@@ -122,7 +122,9 @@ def run_swan(model_dir: str,
     FileNotFoundError
         If the SWAN executable cannot be located on PATH.
     RuntimeError
-        If SWAN returns a non-zero exit code and does not emit ``norm_end``.
+        If SWAN does not write a fresh ``norm_end`` file. Any ``norm_end``
+        or ``<input>.erf`` left over from a previous run is deleted first,
+        so a stale success marker can never mask a failed run.
     """
     if not os.path.isdir(model_dir):
         raise ValueError(f"model_dir does not exist: {model_dir}")
@@ -153,6 +155,14 @@ def run_swan(model_dir: str,
     if extra_args:
         argv += [str(a) for a in extra_args]
 
+    # Remove markers from any previous run so they cannot be mistaken for
+    # the result of this one.
+    norm_end = os.path.join(model_dir, 'norm_end')
+    erf_file = os.path.join(model_dir, f'{base}.erf')
+    for stale in (norm_end, erf_file):
+        if os.path.exists(stale):
+            os.remove(stale)
+
     print(f"    $ {' '.join(shlex.quote(a) for a in argv)}   (in {model_dir})")
     # shell=False: safe w.r.t. shell metacharacters
     result = subprocess.run(
@@ -161,16 +171,30 @@ def run_swan(model_dir: str,
         check=False,
     )
 
-    norm_end = os.path.join(model_dir, 'norm_end')
-    if os.path.exists(norm_end):
-        with open(norm_end) as f:
-            print(f"    SWAN: {f.read().strip()}")
-    elif result.returncode != 0:
-        stderr_tail = (result.stderr or '').strip().splitlines()[-30:]
-        raise RuntimeError(
-            f"SWAN failed (rc={result.returncode}) in {model_dir}:\n"
-            + "\n".join(stderr_tail)
-        )
+    erf_text = ''
+    if os.path.exists(erf_file) and os.path.getsize(erf_file) > 0:
+        with open(erf_file, errors='replace') as f:
+            erf_text = f.read().strip()
+
+    if not os.path.exists(norm_end):
+        tail = ((result.stderr or '') + '\n' + (result.stdout or '')
+                ).strip().splitlines()[-30:]
+        msg = (f"SWAN did not finish normally (rc={result.returncode}, "
+               f"no norm_end written) in {model_dir}.\n" + "\n".join(tail))
+        if erf_text:
+            msg += f"\n--- {os.path.basename(erf_file)} ---\n{erf_text[:2000]}"
+        msg += f"\nInspect {base}.prt for details."
+        raise RuntimeError(msg)
+
+    with open(norm_end) as f:
+        print(f"    SWAN: {f.read().strip()}")
+    if result.returncode != 0:
+        print(f"    WARNING: {swan_cmd} exited with rc={result.returncode} "
+              "although norm_end was written.")
+    if erf_text:
+        print(f"    WARNING: SWAN wrote {os.path.basename(erf_file)}:")
+        for line in erf_text.splitlines()[:10]:
+            print(f"      {line}")
 
     return result
 

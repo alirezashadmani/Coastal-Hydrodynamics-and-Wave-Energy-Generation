@@ -50,6 +50,8 @@ california_bay_nested.F/
 ahp_run.swn
 ga_run.swn
 calib_run.swn
+calib_*.swn
+calib_*.tab
 
 # Local scratch / per-run artefacts
 *.tab.bak
